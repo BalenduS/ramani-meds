@@ -136,6 +136,22 @@ main{padding-top:6px;padding-bottom:calc(env(safe-area-inset-bottom,0px) + 96px)
 .c-tab{--c:var(--t-tab);--cs:var(--t-tab-s);--ct:var(--t-tab-t)}
 .c-neb{--c:var(--t-neb);--cs:var(--t-neb-s);--ct:var(--t-neb-t)}
 .c-air{--c:var(--t-air);--cs:var(--t-air-s);--ct:var(--t-air-t)}
+.c-spo,[data-mode="med"] .c-spo{--c:var(--brand);--cs:var(--brand-soft);--ct:var(--brand)}
+.install{display:flex;align-items:center;gap:12px;background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:12px 14px}
+.install .tx{flex:1;min-width:0;font-size:14px;color:var(--ink2)}
+.install .tx b{display:block;color:var(--ink);font-size:16px}
+.install .x{width:36px;height:36px;font-size:20px}
+.steps{margin:0;padding-left:22px;display:flex;flex-direction:column;gap:10px;font-size:16px}
+.stockb{border:0;background:var(--bg);color:var(--ink2);border-radius:8px;padding:5px 9px;font-size:13px;font-weight:700;min-height:32px}
+.stockb.low{background:var(--warn-soft);color:var(--warn)}
+.stockb.none{background:transparent;border:1px dashed var(--line2);color:var(--muted)}
+.stockrow{display:grid;grid-template-columns:minmax(0,1fr) auto auto;gap:10px;align-items:center;padding:10px 0;border-top:1px solid var(--line)}
+.stockrow:first-child{border-top:0;padding-top:0}
+.stockrow .q{font-size:14px;color:var(--muted)}
+.stockrow .q.low{color:var(--warn);font-weight:700}
+.stepper{display:flex;align-items:center;gap:10px}
+.stepper button{width:48px;height:48px;border-radius:12px;border:1px solid var(--line);background:var(--bg);font-size:22px;font-weight:700}
+.stepper input{width:100px;text-align:center;font-size:26px;font-weight:700;font-family:var(--display);color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:8px}
 [data-mode="med"] .m-wys{--c:var(--m-wys);--cs:var(--m-wys-s);--ct:var(--m-wys-t)}
 [data-mode="med"] .m-pul{--c:var(--m-pul);--cs:var(--m-pul-s);--ct:var(--m-pul-t)}
 [data-mode="med"] .m-erd{--c:var(--m-erd);--cs:var(--m-erd-s);--ct:var(--m-erd-t)}
@@ -221,6 +237,8 @@ const I={
   info:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7.5v.5"/></svg>',
   today:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15" rx="3"/><path d="M3.5 10h17M8 3v4M16 3v4"/></svg>',
   plan:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M8 6h12M8 12h12M8 18h12"/><circle cx="4" cy="6" r="1"/><circle cx="4" cy="12" r="1"/><circle cx="4" cy="18" r="1"/></svg>',
+  pulse:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12h4l2-5 4 10 2-5h6"/></svg>',
+  dl:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v11M7 10l5 5 5-5M5 20h14"/></svg>',
   help:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s-7-4.4-7-10.5A4.5 4.5 0 0 1 12 7a4.5 4.5 0 0 1 7 3.5C19 16.6 12 21 12 21z"/></svg>'
 };
 const TYPES={tab:{label:'Tablets',icon:'tab'},neb:{label:'Nebuliser',icon:'neb'},air:{label:'Breathing',icon:'air'}};
@@ -240,20 +258,32 @@ const MEDS=[
   {id:'max',ab:'Mx',name:'Maxvryz',sub:'tablet, once daily',type:'tab',slots:['noon'],days:15,line:'Check the strip for its purpose',
    generic:'Composition not confirmed',why:'We could not confirm what this tablet contains. Its online listing names only the maker, Curyz Lifesciences.',
    caution:'Check the strip or ask the pharmacist what it contains and why it was prescribed.'},
-  {id:'bip',ab:'Bi',name:'BiPAP',sub:'+ O₂ 1–2 L/min',type:'air',icon:'moon',slots:['night'],days:15,line:'Supports breathing through the night',
-   generic:'BiPAP with oxygen 1–2 L/min, overnight',why:'In hospital her blood test showed carbon dioxide building up (type II respiratory failure). BiPAP supports her breathing during sleep and helps clear that carbon dioxide.'}
+  {id:'bip',ab:'Bi',name:'BiPAP',sub:'+ O₂ 1–2 L/min',type:'air',icon:'moon',slots:['night'],days:15,line:'Start at bedtime, with oxygen',
+   generic:'BiPAP with oxygen 1–2 L/min, overnight',why:'In hospital her blood test showed carbon dioxide building up (type II respiratory failure). BiPAP supports her breathing during sleep and helps clear that carbon dioxide.'},
+  {id:'o2',ab:'O₂',name:'Oxygen',sub:'1–2 L/min overnight',type:'air',icon:'o2',slots:['dawn'],days:15,chip:' off',act:'Mark oxygen switched off',
+   line:'Runs overnight with BiPAP · switch off at 6 AM',generic:'Oxygen 1–2 litres per minute, overnight with BiPAP',
+   why:'Her oxygen level was 81% on room air when she was admitted. Oxygen through the night, given with BiPAP, keeps it in a safer range while she sleeps.',
+   caution:'Switch the oxygen machine off at 6 AM and tick it here. Through the day, check SpO₂ every 3 hours.'}
 ];
-const O2={id:'o2',ab:'O₂',name:'Oxygen',sub:'1–2 L/min',type:'air',icon:'o2',line:'Through the day, as advised',
-  generic:'Oxygen inhalation, 1–2 litres per minute',why:'Her oxygen level was 81% on room air when she was admitted. Extra oxygen keeps it in a safer range while her lungs recover.'};
-const SLOTS=['am','noon','pm','night'];
-const SLOT_NAME={am:'Morning',noon:'Afternoon',pm:'Evening',night:'Bedtime'};
+const SPO={id:'spo',ab:'Sp',name:'SpO₂ check',sub:'every 3 hours',type:'spo',icon:'pulse',generic:'Pulse oximeter reading, 6 AM to bedtime',
+  why:'Her oxygen level was low in hospital (81% on room air). Checking with the pulse oximeter every 3 hours through the day shows early if it is dropping now that the oxygen is off.',
+  caution:'If the reading is lower than usual, or she is breathless, call the emergency numbers in Help.'};
+const CHECKS=['06','09','12','15','18','21'].map(h=>({id:'sp'+h,t:h+':00'}));
+const SLOTS=['dawn','am','noon','pm','night'];
+const SLOT_NAME={dawn:'6 AM',am:'Morning',noon:'Afternoon',pm:'Evening',night:'Bedtime'};
+const UNIT={tab:'tablets',neb:'respules'};
+const dbSlot=s=>(s==='dawn'||s==='chk')?'am':s;
+const appSlot=(slot,med)=>med==='o2'?'dawn':/^sp\d\d$/.test(med)?'chk':slot;
+const timeOf=(s,id)=>s==='chk'?(CHECKS.find(c=>c.id===id)||{t:'06:00'}).t:times[s];
+const nameOf=id=>id.startsWith('sp')?'SpO₂ check':(MEDS.find(m=>m.id===id)||{name:id}).name;
 const W=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'],M=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 
 const ls={get(k,d){try{const v=localStorage.getItem(k);return v==null?d:JSON.parse(v)}catch(e){return d}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
 let me=ls.get('rm-name',''), pin=ls.get('rm-pin',''), mode=ls.get('rm-mode','type');
-let times=Object.assign({am:'08:00',pm:'20:00',night:'22:00'},ls.get('rm-times',{})); times.noon='14:00';
+let times=Object.assign({am:'08:00',pm:'20:00',night:'22:00'},ls.get('rm-times',{})); times.noon='14:00'; times.dawn='06:00';
 let log=new Map(Object.entries(ls.get('rm-log',{})));
-let tab='today', filter='all', live=false;
+let tab='today', filter='all', live=false, deferredInstall=null, installHidden=ls.get('rm-inst-hide',false);
+let stock=ls.get('rm-stock',{});
 
 const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const mid=d=>new Date(d.getFullYear(),d.getMonth(),d.getDate());
@@ -268,6 +298,19 @@ const todayIdx=()=>dayIdx(new Date());
 let sel=Math.min(Math.max(todayIdx(),0),DAYS-1);
 
 function cls(m){return 'c-'+m.type+' m-'+m.id}
+function checksFor(){return CHECKS.filter(c=>toMin(c.t)<toMin(times.night))}
+function stockOf(m){
+  const st=stock[m.id];if(!st)return null;
+  let used=0;log.forEach((v,k)=>{if(k.split('|')[2]===m.id&&v&&v.at&&new Date(v.at)>new Date(st.at))used++});
+  const left=Math.max(0,st.n-used),days=Math.floor(left/m.slots.length);
+  return{left,days,low:days<=2};
+}
+function stockChip(m){
+  if(!UNIT[m.type])return'';
+  const so=stockOf(m);
+  if(!so)return '<button class="stockb none" data-stock="'+m.id+'">+ Stock</button>';
+  return '<button class="stockb'+(so.low?' low':'')+'" data-stock="'+m.id+'" aria-label="'+esc(m.name)+': '+so.left+' '+UNIT[m.type]+' left">'+so.left+' left'+(so.low?' · buy':'')+'</button>';
+}
 function badge(m){const ic=I[m.icon||TYPES[m.type].icon];return '<div class="badge">'+ic+'<span class="ab">'+m.ab+'</span><span class="mini">'+ic+'</span></div>'}
 function slotOrder(){return SLOTS.slice().sort((a,b)=>toMin(times[a])-toMin(times[b]))}
 function medsIn(d,s){return MEDS.filter(m=>m.slots.includes(s)&&d<m.days)}
@@ -321,10 +364,12 @@ function renderToday(){
     else{
       const names=n.pend.map(m=>esc(m.name)).join(', ');
       const late=n.due;
-      h+='<div class="next'+(late?' due':'')+'"><span class="k">'+(late?SLOT_NAME[n.s]+' dose is due':'Next · '+SLOT_NAME[n.s].toLowerCase())+'</span><div class="t num">'+(late?'Due now':fmt(times[n.s]))+'</div><div class="names">'+names+'</div>'+
-        '<button class="go" data-all="'+n.s+'">'+I.check+(n.pend.length>1?'Mark all '+n.pend.length+' given':'Mark given')+'</button></div>';
+      h+='<div class="next'+(late?' due':'')+'"><span class="k">'+(late?(n.s==='dawn'?'6 AM task is due':SLOT_NAME[n.s]+' dose is due'):'Next · '+(n.s==='dawn'?'6 AM':SLOT_NAME[n.s].toLowerCase()))+'</span><div class="t num">'+(late?'Due now':fmt(times[n.s]))+'</div><div class="names">'+names+'</div>'+
+        '<button class="go" data-all="'+n.s+'">'+I.check+(n.pend.length>1?'Mark all '+n.pend.length+' done':(n.pend[0].act||'Mark given'))+'</button></div>';
     }
   }
+  h+=installBanner();
+  h+=spoCard();
   h+='<div class="filters" role="group" aria-label="Filter">'+
     '<button class="chipf" data-f="all" aria-pressed="'+(filter==='all')+'">All</button>'+
     Object.entries(TYPES).map(([k,v])=>'<button class="chipf" data-f="'+k+'" aria-pressed="'+(filter===k)+'">'+I[v.icon]+v.label+'</button>').join('')+'</div>';
@@ -337,7 +382,7 @@ function renderToday(){
       const st=doseState(sel,s,m),r=log.get(key(sel,s,m.id));
       const isNext=hot&&n.s===s&&!n.due;
       const c=st==='given'?'given':isNext?'next':st==='due'?'due':'';
-      const lbl=fmt(times[s],true);
+      const lbl=fmt(times[s],true)+(m.chip||'');
       const inner=st==='given'?I.check+lbl+(r&&r.by?' <span class="by">· '+esc(r.by)+'</span>':''):st==='due'?lbl+' · due':isNext?lbl+' · next':lbl;
       doses+='<button class="dose '+c+'" data-d="'+sel+'" data-s="'+s+'" data-m="'+m.id+'" aria-label="'+esc(m.name)+' '+fmt(times[s])+(st==='given'?', given':', not given')+'">'+inner+'</button>';
     });
@@ -345,16 +390,15 @@ function renderToday(){
     if(m.days<DAYS){const left=m.days-1-sel;course='<span class="course'+(left<=2?' end':'')+'">'+(left===0?'Last day':'Ends '+dateLabel(m.days-1).slice(4))+'</span>'}
     else course='<span class="course">Day '+(sel+1)+' of '+m.days+'</span>';
     h+='<article class="card '+cls(m)+(hot?' hot':'')+'">'+badge(m)+'<div class="body"><div class="hd"><div><div class="nm">'+esc(m.name)+' <small>'+esc(m.sub)+'</small></div><div class="why">'+esc(m.line)+'</div></div>'+
-      '<button class="whyb" data-why="'+m.id+'" aria-label="Why '+esc(m.name)+'">'+I.info+'Why?</button></div><div class="doses">'+doses+course+'</div>'+
+      '<button class="whyb" data-why="'+m.id+'" aria-label="Why '+esc(m.name)+'">'+I.info+'Why?</button></div><div class="doses">'+doses+course+'</div>'+(UNIT[m.type]?'<div class="doses">'+stockChip(m)+'</div>':'')+
       (m.days<DAYS?'<div class="bar"><i style="width:'+Math.round((sel+1)/m.days*100)+'%"></i></div>':'')+'</div></article>';
   });
-  if(filter==='all'||filter==='air')h+='<article class="card '+cls(O2)+'">'+badge(O2)+'<div class="body"><div class="hd"><div><div class="nm">Oxygen <small>1–2 L/min</small></div><div class="why">'+esc(O2.line)+'</div></div><button class="whyb" data-why="o2" aria-label="Why oxygen">'+I.info+'Why?</button></div></div></article>';
   if(sel>=10&&(filter==='all'||filter==='tab'))h+='<p class="note">Wysolone course finished on Day 10 ('+dateLabel(9)+').</p>';
   $('view').innerHTML=h;
   bindView();
 }
 function renderPlan(){
-  const t=todayIdx();let h='<p class="note">Tap a day to see or tick its doses. Dots show morning, 2 PM, evening and bedtime.</p>';
+  const t=todayIdx();let h='<p class="note">Tap a day to see or tick its doses. Dots show 6 AM oxygen off, morning, 2 PM, evening and bedtime.</p>';
   for(let i=0;i<DAYS;i++){
     const st=dayStats(i),d=addDays(START,i);
     const dots=slotOrder().map(s=>{const ms=medsIn(i,s);if(!ms.length)return'';const g=ms.filter(m=>log.has(key(i,s,m.id))).length;
@@ -367,7 +411,11 @@ function renderPlan(){
   $('view').querySelectorAll('[data-goto]').forEach(b=>b.onclick=()=>{sel=+b.dataset.goto;tab='today';render();window.scrollTo(0,0)});
 }
 function renderHelp(){
-  let h='<section class="box alert"><h2>Get urgent care if there is</h2><ul><li>Shortness of breath</li><li>Fever</li><li>Cough with sputum</li></ul>'+
+  let h=(isStandalone()?'':'<section class="sec"><h2>Install on this phone</h2><div class="install"><span style="color:var(--brand);display:grid">'+I.dl+'</span><div class="tx"><b>Add to home screen</b>Opens like an app, full screen, one tap away.</div><button class="btn" data-install>Install</button></div></section>');
+  h+='<section class="sec"><h2>Medicines at home</h2><div class="box">'+MEDS.filter(m=>UNIT[m.type]).map(m=>{const so=stockOf(m);
+    return '<div class="stockrow"><div><b>'+esc(m.name)+'</b><div class="q'+(so&&so.low?' low':'')+'">'+(so?so.left+' '+UNIT[m.type]+' · about '+so.days+' day'+(so.days===1?'':'s'):'Not counted yet')+'</div></div><span></span><button class="btn ghost" data-stock="'+m.id+'">'+(so?'Update':'Add')+'</button></div>'}).join('')+
+    '<p class="note" style="margin:0">Enter how many are in the house. The count goes down by one with every tick. Saved on this phone.</p></div></section>';
+  h+='<section class="box alert"><h2>Get urgent care if there is</h2><ul><li>Shortness of breath</li><li>Fever</li><li>Cough with sputum</li></ul>'+
     '<div class="note" style="color:var(--ink2)">Gleneagles Aware emergency, open 24/7</div>'+
     '<div class="phone"><a href="tel:+914069081111" class="num">+91 40 6908 1111</a><button class="btn ghost" data-copy="+914069081111">Copy</button></div>'+
     '<div class="phone"><a href="tel:+918297222222" class="num">82972 22222</a><button class="btn ghost" data-copy="+918297222222">Copy</button></div></section>';
@@ -381,6 +429,7 @@ function renderHelp(){
     '<button class="btn" id="b-times" style="align-self:flex-start">Save for everyone</button></div></section>';
   h+='<p class="note">From the Gleneagles Aware discharge summary, 17 Oct 2026. Follow the doctor’s advice if anything here differs.</p>';
   $('view').innerHTML=h;
+  bindInstall();bindStock();
   $('view').querySelectorAll('[data-copy]').forEach(b=>b.onclick=()=>{const v=b.dataset.copy;try{navigator.clipboard.writeText(v).then(()=>toast('Copied '+v),()=>{})}catch(e){}});
   $('b-name').onclick=()=>{const v=$('f-name').value.trim();if(!v)return toast('Enter a name');me=v;ls.set('rm-name',me);toast('Saved')};
   $('b-pin').onclick=()=>openSetup(true);
@@ -397,12 +446,73 @@ function bindView(){
   $('view').querySelectorAll('[data-why]').forEach(b=>b.onclick=()=>openWhy(b.dataset.why));
   $('view').querySelectorAll('[data-f]').forEach(b=>b.onclick=()=>{filter=b.dataset.f;render()});
   $('view').querySelectorAll('.dose').forEach(b=>b.onclick=()=>{
-    const d=+b.dataset.d,s=b.dataset.s,id=b.dataset.m,m=MEDS.find(x=>x.id===id);
-    if(log.has(key(d,s,id)))confirmUndo(d,s,m);else setDose(d,s,[id],true);
+    const d=+b.dataset.d,s=b.dataset.s,id=b.dataset.m;
+    if(log.has(key(d,s,id)))confirmUndo(d,s,id);else setDose(d,s,[id],true);
   });
+  bindInstall();bindStock();
+  const ix=$('view').querySelector('[data-inst-x]');if(ix)ix.onclick=()=>{installHidden=true;ls.set('rm-inst-hide',true);render()};
   const all=$('view').querySelector('[data-all]');
   if(all)all.onclick=()=>{const s=all.dataset.all;setDose(sel,s,medsIn(sel,s).filter(m=>!log.has(key(sel,s,m.id))).map(m=>m.id),true)};
 }
+
+function spoCard(){
+  const t=todayIdx(),list=checksFor(),nm=nowMin();
+  let nextId=null;
+  if(sel===t){const f=list.find(c=>toMin(c.t)>nm&&!log.has(key(sel,'chk',c.id)));nextId=f?f.id:null}
+  const missed=sel===t?list.filter(c=>toMin(c.t)<=nm&&!log.has(key(sel,'chk',c.id))):[];
+  const lastDue=missed.length?missed[missed.length-1].id:null;
+  const done=list.filter(c=>log.has(key(sel,'chk',c.id))).length;
+  let chips='';
+  list.forEach(c=>{
+    const r=log.get(key(sel,'chk',c.id)),lbl=fmt(c.t,true);
+    const past=sel<t||(sel===t&&toMin(c.t)<=nm);
+    const cl=r?'given':c.id===lastDue?'due':c.id===nextId?'next':past?'due':'';
+    const inner=r?I.check+lbl+(r.by?' <span class="by">· '+esc(r.by)+'</span>':''):c.id===lastDue?lbl+' · due':c.id===nextId?lbl+' · next':lbl;
+    chips+='<button class="dose '+cl+'" data-d="'+sel+'" data-s="chk" data-m="'+c.id+'" aria-label="SpO2 check '+fmt(c.t)+(r?', done':', not done')+'">'+inner+'</button>';
+  });
+  const status=sel!==t?done+' of '+list.length+' checks done':lastDue?'Check is due now':nextId?'Next check at '+fmt(CHECKS.find(c=>c.id===nextId).t):done===list.length?'All checks done today':'Paused until 6 AM';
+  return '<article class="card c-spo'+(lastDue?' hot':'')+'">'+badge(SPO)+'<div class="body"><div class="hd"><div><div class="nm">SpO₂ check <small>every 3 hours</small></div><div class="why">'+status+' · pauses at bedtime</div></div>'+
+    '<button class="whyb" data-why="spo" aria-label="Why check SpO2">'+I.info+'Why?</button></div><div class="doses">'+chips+'</div></div></article>';
+}
+
+/* ---------- stock ---------- */
+function bindStock(){$('view').querySelectorAll('[data-stock]').forEach(b=>b.onclick=()=>openStock(b.dataset.stock))}
+function openStock(id){
+  const m=MEDS.find(x=>x.id===id),so=stockOf(m),u=UNIT[m.type];
+  openSheet('<div class="sh-hd '+cls(m)+'"><div class="l">'+badge(m)+'<div><h2>'+esc(m.name)+'</h2><div class="note">'+(so?so.left+' '+u+' left · about '+so.days+' days':'Not counted yet')+'</div></div></div><button class="x" data-close aria-label="Close">×</button></div>'+
+    '<label class="field" for="st-n">How many '+u+' are in the house now?</label>'+
+    '<div class="stepper"><button type="button" id="st-m" aria-label="One less">−</button><input id="st-n" type="number" inputmode="numeric" min="0" max="999" value="'+(so?so.left:'')+'" placeholder="0"><button type="button" id="st-p" aria-label="One more">+</button></div>'+
+    '<p class="note" style="margin:0">She uses '+m.slots.length+' a day. Each tick takes one off the count.</p>'+
+    '<button class="btn wide" id="st-save">Save count</button>',
+    close=>{
+      const inp=$('st-n'),step=d=>{inp.value=Math.max(0,(+inp.value||0)+d)};
+      $('st-m').onclick=()=>step(-1);$('st-p').onclick=()=>step(1);
+      $('st-save').onclick=()=>{const n=parseInt(inp.value,10);if(isNaN(n)||n<0)return toast('Enter a number');
+        stock[id]={n,at:new Date().toISOString()};ls.set('rm-stock',stock);close();render();toast(m.name+': '+n+' '+u)};
+    });
+}
+
+/* ---------- install ---------- */
+function isStandalone(){try{return matchMedia('(display-mode: standalone)').matches||navigator.standalone===true}catch(e){return false}}
+const isIOS=/iphone|ipad|ipod/i.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
+function installBanner(){
+  if(isStandalone()||installHidden)return'';
+  return '<div class="install"><span style="color:var(--brand);display:grid">'+I.dl+'</span><div class="tx"><b>Install the app</b>Add it to the home screen for one-tap access.</div><button class="btn" data-install style="padding:10px 14px">Install</button><button class="x" data-inst-x aria-label="Hide">×</button></div>';
+}
+function bindInstall(){$('view').querySelectorAll('[data-install]').forEach(b=>b.onclick=doInstall)}
+async function doInstall(){
+  if(deferredInstall){
+    deferredInstall.prompt();
+    try{const c=await deferredInstall.userChoice;if(c&&c.outcome==='accepted')toast('Installing…')}catch(e){}
+    deferredInstall=null;return;
+  }
+  const steps=isIOS
+    ?'<ol class="steps"><li>Open this page in <b>Safari</b>.</li><li>Tap the <b>Share</b> button, the square with an arrow pointing up.</li><li>Scroll down and tap <b>Add to Home Screen</b>.</li><li>Tap <b>Add</b>. The app appears on the home screen.</li></ol>'
+    :'<ol class="steps"><li>Open this page in <b>Chrome</b>.</li><li>Tap the <b>⋮</b> menu at the top right.</li><li>Tap <b>Install app</b> or <b>Add to Home screen</b>.</li><li>Tap <b>Install</b>.</li></ol>';
+  openSheet('<div class="sh-hd"><h2>Install the app</h2><button class="x" data-close aria-label="Close">×</button></div>'+steps+'<p class="note" style="margin:0">After that, open it from the home screen. Ticks stay synced with everyone.</p>');
+}
+window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();deferredInstall=e});
+window.addEventListener('appinstalled',()=>{deferredInstall=null;toast('Installed');render()});
 
 /* ---------- sheets ---------- */
 function openSheet(html,onBind){
@@ -414,22 +524,22 @@ function openSheet(html,onBind){
   const f=l.querySelector('input,button.btn');if(f)setTimeout(()=>f.focus(),50);
 }
 function openWhy(id){
-  const m=id==='o2'?O2:MEDS.find(x=>x.id===id);
-  const when=m.slots?m.slots.map(s=>fmt(times[s])).join(' and '):'Through the day';
+  const m=id==='spo'?SPO:MEDS.find(x=>x.id===id);
+  const when=m.slots?m.slots.map(s=>fmt(times[s])).join(' and '):checksFor().map(c=>fmt(c.t,true)).join(', ');
   const course=m.days?(m.days<DAYS?m.days+' days · last dose '+dateLabel(m.days-1):'15 days · until '+dateLabel(DAYS-1)):'Until the review visit';
   let given='';if(m.slots){let g=0,t=0;for(let d=0;d<m.days;d++)m.slots.forEach(s=>{t++;if(log.has(key(d,s,m.id)))g++});given='<dt>Given</dt><dd>'+g+' of '+t+' doses</dd>'}
   openSheet('<div class="sh-hd '+cls(m)+'"><div class="l">'+badge(m)+'<div><h2>'+esc(m.name)+'</h2><div class="note">'+esc(m.generic)+'</div></div></div><button class="x" data-close aria-label="Close">×</button></div>'+
-    '<div class="whybox '+cls(m)+'"><span class="eyebrow">Why she takes it</span><p>'+esc(m.why)+'</p></div>'+
-    '<dl class="kv"><dt>When</dt><dd><b>'+when+'</b></dd><dt>Course</dt><dd>'+course+'</dd>'+given+'</dl>'+
+    '<div class="whybox '+cls(m)+'"><span class="eyebrow">'+(m.type==='spo'?'Why we check':m.id==='o2'?'Why she uses it':'Why she takes it')+'</span><p>'+esc(m.why)+'</p></div>'+
+    '<dl class="kv"><dt>When</dt><dd><b>'+when+'</b></dd>'+(m.type==='spo'?'':'<dt>Course</dt><dd>'+course+'</dd>'+given)+(UNIT[m.type]&&stockOf(m)?'<dt>At home</dt><dd>'+stockOf(m).left+' '+UNIT[m.type]+'</dd>':'')+'</dl>'+
     (m.caution?'<div class="caution">'+esc(m.caution)+'</div>':'')+
     '<p class="note" style="margin:0">Plain-language summary for family. Dose and timing come from the discharge summary.</p>');
 }
-function confirmUndo(d,s,m){
-  const r=log.get(key(d,s,m.id));
+function confirmUndo(d,s,id){
+  const r=log.get(key(d,s,id));
   openSheet('<div class="sh-hd"><h2>Undo this tick?</h2><button class="x" data-close aria-label="Close">×</button></div>'+
-    '<p style="margin:0">'+esc(m.name)+', '+fmt(times[s])+' on '+dateLabel(d)+' was marked given'+(r&&r.at?' at '+clock(r.at):'')+(r&&r.by?' by '+esc(r.by):'')+'.</p>'+
-    '<div style="display:flex;gap:10px"><button class="btn ghost" data-close style="flex:1;height:52px;font-size:16px">Keep it</button><button class="btn" id="undo" style="flex:1;background:var(--danger);color:var(--surface)">Mark not given</button></div>',
-    close=>{$('undo').onclick=()=>{close();setDose(d,s,[m.id],false)}});
+    '<p style="margin:0">'+esc(nameOf(id))+', '+fmt(timeOf(s,id))+' on '+dateLabel(d)+' was marked done'+(r&&r.at?' at '+clock(r.at):'')+(r&&r.by?' by '+esc(r.by):'')+'.</p>'+
+    '<div style="display:flex;gap:10px"><button class="btn ghost" data-close style="flex:1;height:52px;font-size:16px">Keep it</button><button class="btn" id="undo" style="flex:1;background:var(--danger);color:var(--surface)">Remove tick</button></div>',
+    close=>{$('undo').onclick=()=>{close();setDose(d,s,[id],false)}});
 }
 function openSetup(force){
   openSheet('<div class="sh-hd"><h2>'+(me&&pin?'Change PIN':'Welcome')+'</h2>'+(force?'<button class="x" data-close aria-label="Close">×</button>':'')+'</div>'+
@@ -464,7 +574,7 @@ async function setDose(d,s,ids,given){
   ids.forEach(id=>given?log.set(key(d,s,id),{at:new Date().toISOString(),by:me}):log.delete(key(d,s,id)));
   render();
   if(navigator.vibrate)try{navigator.vibrate(15)}catch(e){}
-  const{error}=sb?await sb.rpc('set_dose',{p_pin:pin,p_day:d,p_slot:s,p_meds:ids,p_given:given,p_by:me}):{error:{message:'offline'}};
+  const{error}=sb?await sb.rpc('set_dose',{p_pin:pin,p_day:d,p_slot:dbSlot(s),p_meds:ids,p_given:given,p_by:me}):{error:{message:'offline'}};
   if(error){
     prev.forEach(([id,v])=>v?log.set(key(d,s,id),v):log.delete(key(d,s,id)));render();
     if(/wrong_pin/.test(error.message)){pin='';ls.set('rm-pin','');openSetup();toast('PIN changed. Enter the new one.')}
@@ -472,14 +582,14 @@ async function setDose(d,s,ids,given){
     return;
   }
   saveLocal();
-  toast(given?(ids.length>1?ids.length+' doses marked given':'Marked given'):'Tick removed');
+  toast(given?(ids.length>1?ids.length+' ticked':'Ticked'):'Tick removed');
 }
 async function load(){
   if(!sb)return;
   const[a,b]=await Promise.all([sb.from('dose_log').select('day,slot,med_id,given_at,given_by'),sb.from('settings').select('key,value')]);
   if(a.error||b.error){live=false;renderHeader();return}
-  log=new Map(a.data.map(r=>[key(r.day,r.slot,r.med_id),{at:r.given_at,by:r.given_by}]));saveLocal();
-  const t=(b.data.find(x=>x.key==='times')||{}).value;if(t){times=Object.assign(times,t);times.noon='14:00';ls.set('rm-times',t)}
+  log=new Map(a.data.map(r=>[key(r.day,appSlot(r.slot,r.med_id),r.med_id),{at:r.given_at,by:r.given_by}]));saveLocal();
+  const t=(b.data.find(x=>x.key==='times')||{}).value;if(t){times=Object.assign(times,t);times.noon='14:00';times.dawn='06:00';ls.set('rm-times',t)}
   if(tab!=='help')render();else renderHeader();
 }
 let ch;
