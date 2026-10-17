@@ -1,5 +1,5 @@
 // App shell cache. Supabase data calls always go to the network.
-const CACHE = 'ramani-meds-v4';
+const CACHE = 'ramani-meds-v5';
 const SHELL = ['./', 'index.html', 'manifest.json', 'icon-192.png', 'icon-512.png',
   'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js'];
 

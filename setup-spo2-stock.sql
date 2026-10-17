@@ -1,5 +1,5 @@
--- Run once in Supabase: project "ramani-meds" → SQL Editor → New query → paste → Run.
--- Adds SpO2 readings and shared stock counts. Nothing existing is changed.
+-- Applied to project "ramani-meds" on 17 Oct 2026. Kept as a record of the schema.
+-- Adds SpO2 readings and shared stock counts.
 
 create table if not exists public.spo2_reading (
   day smallint not null check (day between 0 and 14),
@@ -32,13 +32,6 @@ begin
     on conflict (day, slot, med_id) do nothing;
 end $$;
 
-create or replace function public.clear_spo2(p_pin text, p_day int, p_check text)
-returns void language plpgsql security definer set search_path = '' as $$
-begin
-  if not public.check_pin(p_pin) then raise exception 'wrong_pin' using errcode = '28000'; end if;
-  delete from public.spo2_reading where day = p_day and check_id = p_check;
-  delete from public.dose_log where day = p_day and slot = 'am' and med_id = p_check;
-end $$;
 
 create or replace function public.set_stock(p_pin text, p_med text, p_count int, p_by text)
 returns void language plpgsql security definer set search_path = '' as $$
@@ -49,6 +42,5 @@ begin
 end $$;
 
 grant execute on function public.save_spo2(text,int,text,int,int,text) to anon, authenticated;
-grant execute on function public.clear_spo2(text,int,text) to anon, authenticated;
 grant execute on function public.set_stock(text,text,int,text) to anon, authenticated;
 alter publication supabase_realtime add table public.spo2_reading, public.med_stock;

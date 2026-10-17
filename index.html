@@ -471,7 +471,7 @@ function spoCard(){
     const inner=r?I.check+lbl+(rd?' · <b>'+rd.v+'%</b>':'')+(r.by?' <span class="by">· '+esc(r.by)+'</span>':''):c.id===lastDue?lbl+' · due':c.id===nextId?lbl+' · next':lbl;
     chips+='<button class="dose '+cl+'" data-d="'+sel+'" data-s="chk" data-m="'+c.id+'" aria-label="SpO2 check '+fmt(c.t)+(r?', done':', not done')+'">'+inner+'</button>';
   });
-  const reads=list.map(c=>spo.get(key(sel,'chk',c.id))).filter(Boolean).sort((a,b)=>new Date(b.at)-new Date(a.at));
+  const reads=list.filter(c=>log.has(key(sel,'chk',c.id))).map(c=>spo.get(key(sel,'chk',c.id))).filter(Boolean).sort((a,b)=>new Date(b.at)-new Date(a.at));
   const lastTxt=reads.length?'Last '+reads[0].v+'%'+(reads[0].p?', pulse '+reads[0].p:'')+' · ':'';
   const status=lastTxt+(sel!==t?done+' of '+list.length+' checks done':lastDue?'Check is due now':nextId?'Next check at '+fmt(CHECKS.find(c=>c.id===nextId).t):done===list.length?'All checks done today':'Paused until 6 AM');
   return '<article class="card c-spo'+(lastDue?' hot':'')+'">'+badge(SPO)+'<div class="body"><div class="hd"><div><div class="nm">SpO₂ check <small>every 3 hours</small></div><div class="why">'+status+' · pauses at bedtime</div></div>'+
@@ -533,14 +533,6 @@ async function saveSpo(d,id,val,pr){
     return toast(/wrong_pin/.test(error.message)?'Wrong PIN. Enter it again.':'Not saved: no connection. Try again.')}
   saveLocal();toast('SpO₂ '+val+'% saved');
 }
-async function clearSpo(d,id){
-  const k=key(d,'chk',id),prevL=log.get(k),prevS=spo.get(k);
-  log.delete(k);spo.delete(k);render();
-  const{error}=await sb.rpc('clear_spo2',{p_pin:pin,p_day:d,p_check:id});
-  if(error){if(prevL)log.set(k,prevL);if(prevS)spo.set(k,prevS);render();return toast('Not removed: no connection. Try again.')}
-  saveLocal();toast('Tick removed');
-}
-
 /* ---------- install ---------- */
 function isStandalone(){try{return matchMedia('(display-mode: standalone)').matches||navigator.standalone===true}catch(e){return false}}
 const isIOS=/iphone|ipad|ipod/i.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
@@ -588,7 +580,7 @@ function confirmUndo(d,s,id){
   openSheet('<div class="sh-hd"><h2>Undo this tick?</h2><button class="x" data-close aria-label="Close">×</button></div>'+
     '<p style="margin:0">'+esc(nameOf(id))+', '+fmt(timeOf(s,id))+' on '+dateLabel(d)+' was marked done'+(r&&r.at?' at '+clock(r.at):'')+(r&&r.by?' by '+esc(r.by):'')+'.</p>'+
     '<div style="display:flex;gap:10px"><button class="btn ghost" data-close style="flex:1;height:52px;font-size:16px">Keep it</button><button class="btn" id="undo" style="flex:1;background:var(--danger);color:var(--surface)">Remove tick</button></div>',
-    close=>{$('undo').onclick=()=>{close();if(s==='chk'&&srvSpo)clearSpo(d,id);else setDose(d,s,[id],false)}});
+    close=>{$('undo').onclick=()=>{close();if(s==='chk')spo.delete(key(d,s,id));setDose(d,s,[id],false)}});
 }
 function openSetup(force){
   openSheet('<div class="sh-hd"><h2>'+(me&&pin?'Change PIN':'Welcome')+'</h2>'+(force?'<button class="x" data-close aria-label="Close">×</button>':'')+'</div>'+
