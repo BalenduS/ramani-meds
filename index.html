@@ -283,7 +283,7 @@ let me=ls.get('rm-name',''), pin=ls.get('rm-pin',''), mode=ls.get('rm-mode','typ
 let times=Object.assign({am:'08:00',pm:'20:00',night:'22:00'},ls.get('rm-times',{})); times.noon='14:00'; times.dawn='06:00';
 let log=new Map(Object.entries(ls.get('rm-log',{})));
 let tab='today', filter='all', live=false, deferredInstall=null, installHidden=ls.get('rm-inst-hide',false);
-let stock=ls.get('rm-stock',{});
+let stock=ls.get('rm-stock',{}), spo=new Map(Object.entries(ls.get('rm-spo',{}))), srvStock=false, srvSpo=false;
 
 const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const mid=d=>new Date(d.getFullYear(),d.getMonth(),d.getDate());
@@ -414,7 +414,7 @@ function renderHelp(){
   let h=(isStandalone()?'':'<section class="sec"><h2>Install on this phone</h2><div class="install"><span style="color:var(--brand);display:grid">'+I.dl+'</span><div class="tx"><b>Add to home screen</b>Opens like an app, full screen, one tap away.</div><button class="btn" data-install>Install</button></div></section>');
   h+='<section class="sec"><h2>Medicines at home</h2><div class="box">'+MEDS.filter(m=>UNIT[m.type]).map(m=>{const so=stockOf(m);
     return '<div class="stockrow"><div><b>'+esc(m.name)+'</b><div class="q'+(so&&so.low?' low':'')+'">'+(so?so.left+' '+UNIT[m.type]+' · about '+so.days+' day'+(so.days===1?'':'s'):'Not counted yet')+'</div></div><span></span><button class="btn ghost" data-stock="'+m.id+'">'+(so?'Update':'Add')+'</button></div>'}).join('')+
-    '<p class="note" style="margin:0">Enter how many are in the house. The count goes down by one with every tick. Saved on this phone.</p></div></section>';
+    '<p class="note" style="margin:0">Enter how many are in the house. The count goes down by one with every tick.'+(srvStock?' Shared with everyone.':' Saved on this phone until the database update is done.')+'</p></div></section>';
   h+='<section class="box alert"><h2>Get urgent care if there is</h2><ul><li>Shortness of breath</li><li>Fever</li><li>Cough with sputum</li></ul>'+
     '<div class="note" style="color:var(--ink2)">Gleneagles Aware emergency, open 24/7</div>'+
     '<div class="phone"><a href="tel:+914069081111" class="num">+91 40 6908 1111</a><button class="btn ghost" data-copy="+914069081111">Copy</button></div>'+
@@ -447,7 +447,7 @@ function bindView(){
   $('view').querySelectorAll('[data-f]').forEach(b=>b.onclick=()=>{filter=b.dataset.f;render()});
   $('view').querySelectorAll('.dose').forEach(b=>b.onclick=()=>{
     const d=+b.dataset.d,s=b.dataset.s,id=b.dataset.m;
-    if(log.has(key(d,s,id)))confirmUndo(d,s,id);else setDose(d,s,[id],true);
+    if(log.has(key(d,s,id)))confirmUndo(d,s,id);else if(s==='chk')openSpo(d,id);else setDose(d,s,[id],true);
   });
   bindInstall();bindStock();
   const ix=$('view').querySelector('[data-inst-x]');if(ix)ix.onclick=()=>{installHidden=true;ls.set('rm-inst-hide',true);render()};
@@ -467,10 +467,13 @@ function spoCard(){
     const r=log.get(key(sel,'chk',c.id)),lbl=fmt(c.t,true);
     const past=sel<t||(sel===t&&toMin(c.t)<=nm);
     const cl=r?'given':c.id===lastDue?'due':c.id===nextId?'next':past?'due':'';
-    const inner=r?I.check+lbl+(r.by?' <span class="by">· '+esc(r.by)+'</span>':''):c.id===lastDue?lbl+' · due':c.id===nextId?lbl+' · next':lbl;
+    const rd=spo.get(key(sel,'chk',c.id));
+    const inner=r?I.check+lbl+(rd?' · <b>'+rd.v+'%</b>':'')+(r.by?' <span class="by">· '+esc(r.by)+'</span>':''):c.id===lastDue?lbl+' · due':c.id===nextId?lbl+' · next':lbl;
     chips+='<button class="dose '+cl+'" data-d="'+sel+'" data-s="chk" data-m="'+c.id+'" aria-label="SpO2 check '+fmt(c.t)+(r?', done':', not done')+'">'+inner+'</button>';
   });
-  const status=sel!==t?done+' of '+list.length+' checks done':lastDue?'Check is due now':nextId?'Next check at '+fmt(CHECKS.find(c=>c.id===nextId).t):done===list.length?'All checks done today':'Paused until 6 AM';
+  const reads=list.map(c=>spo.get(key(sel,'chk',c.id))).filter(Boolean).sort((a,b)=>new Date(b.at)-new Date(a.at));
+  const lastTxt=reads.length?'Last '+reads[0].v+'%'+(reads[0].p?', pulse '+reads[0].p:'')+' · ':'';
+  const status=lastTxt+(sel!==t?done+' of '+list.length+' checks done':lastDue?'Check is due now':nextId?'Next check at '+fmt(CHECKS.find(c=>c.id===nextId).t):done===list.length?'All checks done today':'Paused until 6 AM');
   return '<article class="card c-spo'+(lastDue?' hot':'')+'">'+badge(SPO)+'<div class="body"><div class="hd"><div><div class="nm">SpO₂ check <small>every 3 hours</small></div><div class="why">'+status+' · pauses at bedtime</div></div>'+
     '<button class="whyb" data-why="spo" aria-label="Why check SpO2">'+I.info+'Why?</button></div><div class="doses">'+chips+'</div></div></article>';
 }
@@ -482,14 +485,60 @@ function openStock(id){
   openSheet('<div class="sh-hd '+cls(m)+'"><div class="l">'+badge(m)+'<div><h2>'+esc(m.name)+'</h2><div class="note">'+(so?so.left+' '+u+' left · about '+so.days+' days':'Not counted yet')+'</div></div></div><button class="x" data-close aria-label="Close">×</button></div>'+
     '<label class="field" for="st-n">How many '+u+' are in the house now?</label>'+
     '<div class="stepper"><button type="button" id="st-m" aria-label="One less">−</button><input id="st-n" type="number" inputmode="numeric" min="0" max="999" value="'+(so?so.left:'')+'" placeholder="0"><button type="button" id="st-p" aria-label="One more">+</button></div>'+
-    '<p class="note" style="margin:0">She uses '+m.slots.length+' a day. Each tick takes one off the count.</p>'+
+    '<p class="note" style="margin:0">She uses '+m.slots.length+' a day. Each tick takes one off the count.'+(srvStock?' Shared with everyone.':' Saved on this phone.')+'</p>'+
     '<button class="btn wide" id="st-save">Save count</button>',
     close=>{
       const inp=$('st-n'),step=d=>{inp.value=Math.max(0,(+inp.value||0)+d)};
       $('st-m').onclick=()=>step(-1);$('st-p').onclick=()=>step(1);
       $('st-save').onclick=()=>{const n=parseInt(inp.value,10);if(isNaN(n)||n<0)return toast('Enter a number');
-        stock[id]={n,at:new Date().toISOString()};ls.set('rm-stock',stock);close();render();toast(m.name+': '+n+' '+u)};
+        close();saveStock(id,n)};
     });
+}
+
+async function saveStock(id,n){
+  const m=MEDS.find(x=>x.id===id),u=UNIT[m.type];
+  if(srvStock){
+    if(!pin||!me)return openSetup();
+    const{error}=await sb.rpc('set_stock',{p_pin:pin,p_med:id,p_count:n,p_by:me});
+    if(error)return toast(/wrong_pin/.test(error.message)?'Wrong PIN. Enter it again.':'Not saved: no connection. Try again.');
+  }
+  stock[id]={n,at:new Date().toISOString(),by:me};ls.set('rm-stock',stock);render();toast(m.name+': '+n+' '+u);
+}
+function openSpo(d,id){
+  const c=CHECKS.find(x=>x.id===id);
+  openSheet('<div class="sh-hd c-spo"><div class="l">'+badge(SPO)+'<div><h2>SpO₂ check</h2><div class="note">'+fmt(c.t)+' · '+dateLabel(d)+'</div></div></div><button class="x" data-close aria-label="Close">×</button></div>'+
+    '<label class="field" for="sp-v">SpO₂ reading (%)</label>'+
+    '<div class="stepper"><button type="button" id="sp-m" aria-label="One less">−</button><input id="sp-v" type="number" inputmode="numeric" min="50" max="100" placeholder="95"><button type="button" id="sp-p" aria-label="One more">+</button></div>'+
+    '<label class="field" for="sp-pr">Pulse (optional)<input id="sp-pr" type="number" inputmode="numeric" min="30" max="220" placeholder="e.g. 88"></label>'+
+    (srvSpo?'':'<p class="note" style="margin:0">Readings are kept once the database update is done. For now this saves the tick.</p>')+
+    '<div class="err" id="sp-err" hidden></div><button class="btn wide" id="sp-save">Save reading</button>',
+    close=>{
+      const v=$('sp-v'),step=k=>{v.value=Math.min(100,Math.max(50,(+v.value||95)+k))};
+      $('sp-m').onclick=()=>step(-1);$('sp-p').onclick=()=>step(1);
+      $('sp-save').onclick=async()=>{
+        const val=parseInt(v.value,10),pr=$('sp-pr').value?parseInt($('sp-pr').value,10):null,err=$('sp-err');err.hidden=true;
+        if(isNaN(val)||val<50||val>100){err.textContent='Enter the SpO₂ number from the oximeter, between 50 and 100.';err.hidden=false;return}
+        if(pr!==null&&(isNaN(pr)||pr<30||pr>220)){err.textContent='Pulse should be between 30 and 220, or leave it empty.';err.hidden=false;return}
+        close();saveSpo(d,id,val,pr);
+      };
+    });
+}
+async function saveSpo(d,id,val,pr){
+  if(!pin||!me)return openSetup();
+  if(!srvSpo)return setDose(d,'chk',[id],true);
+  const k=key(d,'chk',id),prevL=log.get(k),prevS=spo.get(k),now=new Date().toISOString();
+  log.set(k,{at:now,by:me});spo.set(k,{v:val,p:pr,at:now,by:me});render();
+  const{error}=await sb.rpc('save_spo2',{p_pin:pin,p_day:d,p_check:id,p_value:val,p_pulse:pr,p_by:me});
+  if(error){prevL?log.set(k,prevL):log.delete(k);prevS?spo.set(k,prevS):spo.delete(k);render();
+    return toast(/wrong_pin/.test(error.message)?'Wrong PIN. Enter it again.':'Not saved: no connection. Try again.')}
+  saveLocal();toast('SpO₂ '+val+'% saved');
+}
+async function clearSpo(d,id){
+  const k=key(d,'chk',id),prevL=log.get(k),prevS=spo.get(k);
+  log.delete(k);spo.delete(k);render();
+  const{error}=await sb.rpc('clear_spo2',{p_pin:pin,p_day:d,p_check:id});
+  if(error){if(prevL)log.set(k,prevL);if(prevS)spo.set(k,prevS);render();return toast('Not removed: no connection. Try again.')}
+  saveLocal();toast('Tick removed');
 }
 
 /* ---------- install ---------- */
@@ -539,7 +588,7 @@ function confirmUndo(d,s,id){
   openSheet('<div class="sh-hd"><h2>Undo this tick?</h2><button class="x" data-close aria-label="Close">×</button></div>'+
     '<p style="margin:0">'+esc(nameOf(id))+', '+fmt(timeOf(s,id))+' on '+dateLabel(d)+' was marked done'+(r&&r.at?' at '+clock(r.at):'')+(r&&r.by?' by '+esc(r.by):'')+'.</p>'+
     '<div style="display:flex;gap:10px"><button class="btn ghost" data-close style="flex:1;height:52px;font-size:16px">Keep it</button><button class="btn" id="undo" style="flex:1;background:var(--danger);color:var(--surface)">Remove tick</button></div>',
-    close=>{$('undo').onclick=()=>{close();setDose(d,s,[id],false)}});
+    close=>{$('undo').onclick=()=>{close();if(s==='chk'&&srvSpo)clearSpo(d,id);else setDose(d,s,[id],false)}});
 }
 function openSetup(force){
   openSheet('<div class="sh-hd"><h2>'+(me&&pin?'Change PIN':'Welcome')+'</h2>'+(force?'<button class="x" data-close aria-label="Close">×</button>':'')+'</div>'+
@@ -566,7 +615,7 @@ let tt;function toast(msg){const t=$('toast');t.textContent=msg;t.hidden=false;c
 
 /* ---------- data ---------- */
 const sb=window.supabase?window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY,{auth:{persistSession:false}}):null;
-function saveLocal(){ls.set('rm-log',Object.fromEntries(log))}
+function saveLocal(){ls.set('rm-log',Object.fromEntries(log));ls.set('rm-spo',Object.fromEntries(spo))}
 async function setDose(d,s,ids,given){
   if(!ids.length)return;
   if(!pin||!me)return openSetup();
@@ -586,7 +635,11 @@ async function setDose(d,s,ids,given){
 }
 async function load(){
   if(!sb)return;
-  const[a,b]=await Promise.all([sb.from('dose_log').select('day,slot,med_id,given_at,given_by'),sb.from('settings').select('key,value')]);
+  const[a,b,c,e]=await Promise.all([sb.from('dose_log').select('day,slot,med_id,given_at,given_by'),sb.from('settings').select('key,value'),
+    sb.from('spo2_reading').select('day,check_id,value,pulse,taken_at,taken_by'),sb.from('med_stock').select('med_id,count,set_at,set_by')]);
+  srvSpo=!c.error;srvStock=!e.error;
+  if(srvSpo)spo=new Map(c.data.map(r=>[key(r.day,'chk',r.check_id),{v:r.value,p:r.pulse,at:r.taken_at,by:r.taken_by}]));
+  if(srvStock){stock={};e.data.forEach(r=>{stock[r.med_id]={n:r.count,at:r.set_at,by:r.set_by}});ls.set('rm-stock',stock)}
   if(a.error||b.error){live=false;renderHeader();return}
   log=new Map(a.data.map(r=>[key(r.day,appSlot(r.slot,r.med_id),r.med_id),{at:r.given_at,by:r.given_by}]));saveLocal();
   const t=(b.data.find(x=>x.key==='times')||{}).value;if(t){times=Object.assign(times,t);times.noon='14:00';times.dawn='06:00';ls.set('rm-times',t)}
@@ -598,6 +651,7 @@ function subscribe(){
   if(ch)sb.removeChannel(ch);
   let timer;const soon=()=>{clearTimeout(timer);timer=setTimeout(load,250)};
   ch=sb.channel('ramani-meds').on('postgres_changes',{event:'*',schema:'public',table:'dose_log'},soon).on('postgres_changes',{event:'*',schema:'public',table:'settings'},soon)
+    .on('postgres_changes',{event:'*',schema:'public',table:'spo2_reading'},soon).on('postgres_changes',{event:'*',schema:'public',table:'med_stock'},soon)
     .subscribe(st=>{live=st==='SUBSCRIBED';renderHeader();if(live)load()});
 }
 
