@@ -1,0 +1,505 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Ramani's Medicines</title>
+<meta name="theme-color" content="#F1F4F7" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0E1318" media="(prefers-color-scheme: dark)">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Ramani Meds">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700&display=swap">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
+<style>
+/* Layout: phone-first single column; sticky header, scrolling medicine cards, fixed bottom tabs. */
+:root{
+  --bg:#F1F4F7; --surface:#FFFFFF; --ink:#18212C; --ink2:#3D4957; --muted:#5B6878; --line:#DAE1E8; --line2:#B9C6D3;
+  --brand:#2C5B88; --brand-soft:#E2EBF4; --on-strong:#FFFFFF;
+  --ok:#1E5A3F; --ok-soft:#E0F1E8; --warn:#8A5200; --warn-soft:#FBEDD7; --danger:#B0281F; --danger-soft:#FBE4E1;
+  /* type colours */
+  --t-tab:#2C5B88; --t-tab-s:#E2EBF4; --t-tab-t:#24507A;
+  --t-neb:#1F6E61; --t-neb-s:#DCEFEA; --t-neb-t:#1A5F54;
+  --t-air:#5B4396; --t-air-s:#EEEAF7; --t-air-t:#4A3880;
+  /* per-medicine colours */
+  --m-wys:#9A5B00; --m-wys-s:#FBEDD7; --m-wys-t:#7A4800;
+  --m-pul:#2C5B88; --m-pul-s:#E2EBF4; --m-pul-t:#24507A;
+  --m-erd:#A33A5B; --m-erd-s:#F8E3EA; --m-erd-t:#852C48;
+  --m-for:#3F4DA3; --m-for-s:#E5E8F8; --m-for-t:#323E86;
+  --m-rev:#1F6E61; --m-rev-s:#DCEFEA; --m-rev-t:#1A5F54;
+  --m-max:#5E6B1F; --m-max-s:#EEF1DA; --m-max-t:#4A5418;
+  --m-bip:#5B4396; --m-bip-s:#EEEAF7; --m-bip-t:#4A3880;
+  --m-o2:#1D6E8F; --m-o2-s:#DDEFF6; --m-o2-t:#165A75;
+  --display:"Bricolage Grotesque","Avenir Next","Segoe UI",system-ui,sans-serif;
+  --body:"Atkinson Hyperlegible","Segoe UI",system-ui,-apple-system,sans-serif;
+}
+@media (prefers-color-scheme: dark){:root{
+  --bg:#0E1318; --surface:#161D25; --ink:#E5EAF0; --ink2:#C3CDD8; --muted:#97A4B3; --line:#26313D; --line2:#3A4756;
+  --brand:#86AFD9; --brand-soft:#1B2B3D; --on-strong:#0E1318;
+  --ok:#7ED3AA; --ok-soft:#14302A; --warn:#EDB25C; --warn-soft:#33270F; --danger:#F08A80; --danger-soft:#3A1A18;
+  --t-tab:#86AFD9; --t-tab-s:#1B2B3D; --t-tab-t:#A9C8E8;
+  --t-neb:#6CC4B4; --t-neb-s:#143029; --t-neb-t:#93D8CB;
+  --t-air:#B4A2E6; --t-air-s:#28213D; --t-air-t:#CBBDF0;
+  --m-wys:#EDB25C; --m-wys-s:#33270F; --m-wys-t:#F3C886;
+  --m-pul:#86AFD9; --m-pul-s:#1B2B3D; --m-pul-t:#A9C8E8;
+  --m-erd:#EC93AE; --m-erd-s:#3A1C27; --m-erd-t:#F3B4C7;
+  --m-for:#A3ACEB; --m-for-s:#20254A; --m-for-t:#C1C7F2;
+  --m-rev:#6CC4B4; --m-rev-s:#143029; --m-rev-t:#93D8CB;
+  --m-max:#C2CF72; --m-max-s:#2A2E14; --m-max-t:#D5DF9A;
+  --m-bip:#B4A2E6; --m-bip-s:#28213D; --m-bip-t:#CBBDF0;
+  --m-o2:#7CC6E3; --m-o2-s:#13303C; --m-o2-t:#A4D8EC;
+  color-scheme:dark}}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.45;-webkit-tap-highlight-color:transparent}
+button{font:inherit;color:inherit;cursor:pointer}
+input{font:inherit}
+:focus-visible{outline:3px solid var(--brand);outline-offset:2px;border-radius:8px}
+h1,h2,h3{font-family:var(--display);margin:0;letter-spacing:-.01em;text-wrap:balance}
+.num{font-variant-numeric:tabular-nums}
+.eyebrow{font-size:13px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.gut{padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.wrap{max-width:560px;margin:0 auto}
+
+header.top{position:sticky;top:0;z-index:5;background:var(--bg);padding-top:calc(env(safe-area-inset-top,0px) + 14px);padding-bottom:8px}
+.toprow{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
+.toprow h1{font-size:28px;line-height:1.1}
+.sync{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--muted);font-weight:700;white-space:nowrap;padding-top:4px}
+.sync i{width:8px;height:8px;border-radius:50%;background:var(--line2)}
+.sync.live i{background:#2E9B67}
+.seg{display:inline-flex;background:var(--surface);border:1px solid var(--line);border-radius:999px;padding:3px;gap:2px;margin-top:12px}
+.seg button{border:0;background:transparent;border-radius:999px;padding:6px 12px;font-size:14px;color:var(--muted);font-weight:700}
+.seg button[aria-pressed="true"]{background:var(--ink);color:var(--bg)}
+.strip{display:flex;gap:6px;overflow-x:auto;padding:12px 2px 4px;scrollbar-width:none}
+.strip::-webkit-scrollbar{display:none}
+.day{flex:0 0 52px;border:1px solid var(--line);background:var(--surface);border-radius:12px;padding:6px 4px 7px;display:flex;flex-direction:column;align-items:center;gap:1px}
+.day .w{font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase}
+.day .d{font-family:var(--display);font-weight:700;font-size:19px;line-height:1.1}
+.day .b{width:28px;height:4px;border-radius:2px;background:var(--line);overflow:hidden;margin-top:3px}
+.day .b i{display:block;height:100%;background:#2E9B67}
+.day.today{border-color:var(--brand)}
+.day.today .w{color:var(--brand)}
+.day[aria-pressed="true"]{background:var(--ink);border-color:var(--ink);color:var(--bg)}
+.day[aria-pressed="true"] .w{color:var(--bg);opacity:.8}
+
+main{padding-top:6px;padding-bottom:calc(env(safe-area-inset-bottom,0px) + 96px);display:flex;flex-direction:column;gap:12px}
+.filters{display:flex;gap:8px;flex-wrap:wrap}
+.chipf{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:6px 12px 6px 9px;font-size:14px;font-weight:700;display:flex;gap:6px;align-items:center;color:var(--ink2)}
+.chipf svg{width:17px;height:17px}
+.chipf[aria-pressed="true"]{background:var(--ink);border-color:var(--ink);color:var(--bg)}
+
+.next{border-radius:20px;padding:16px;display:flex;flex-direction:column;gap:12px;background:var(--brand);color:var(--on-strong)}
+.next.due{background:var(--warn-soft);color:var(--ink);border:1px solid var(--warn)}
+.next.done{background:var(--ok-soft);color:var(--ink)}
+.next .k{font-size:13px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;opacity:.85}
+.next.due .k{color:var(--warn);opacity:1}.next.done .k{color:var(--ok);opacity:1}
+.next .t{font-family:var(--display);font-weight:700;font-size:40px;line-height:1}
+.next .names{font-size:16px}
+.next .go{height:52px;border:0;border-radius:14px;background:var(--surface);color:var(--brand);font-weight:700;font-size:17px;display:flex;gap:8px;align-items:center;justify-content:center}
+.next.due .go{background:var(--warn);color:var(--surface)}
+.next .go svg{width:20px;height:20px}
+
+.card{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:14px;display:grid;grid-template-columns:52px minmax(0,1fr);gap:12px;align-items:start}
+.card.hot{border:2px solid var(--c);padding:13px}
+.badge{position:relative;width:52px;height:52px;display:grid;place-items:center;background:var(--c);color:var(--on-strong)}
+.badge svg{width:26px;height:26px}
+.badge .ab{font-family:var(--display);font-weight:700;font-size:19px}
+.badge .mini{position:absolute;right:-4px;bottom:-4px;width:22px;height:22px;border-radius:50%;background:var(--surface);border:1px solid var(--line);color:var(--c);display:grid;place-items:center}
+.badge .mini svg{width:13px;height:13px}
+[data-mode="type"] .badge{border-radius:14px}
+[data-mode="type"] .badge .ab,[data-mode="type"] .badge .mini{display:none}
+[data-mode="med"] .badge{border-radius:50%}
+[data-mode="med"] .badge>svg{display:none}
+.body{display:flex;flex-direction:column;gap:8px;min-width:0}
+.hd{display:flex;justify-content:space-between;gap:8px;align-items:flex-start}
+.nm{font-weight:700;font-size:17px}
+.nm small{font-weight:400;color:var(--muted);font-size:14px}
+.why{font-size:14px;color:var(--ink2)}
+.whyb{flex:none;border:0;background:var(--cs);color:var(--ct);border-radius:999px;padding:4px 10px;font-size:13px;font-weight:700;display:flex;gap:4px;align-items:center}
+.whyb svg{width:15px;height:15px}
+.doses{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.dose{min-height:36px;border-radius:10px;padding:5px 10px;font-size:14px;font-weight:700;display:flex;gap:5px;align-items:center;border:1px dashed var(--line2);background:transparent;color:var(--ct)}
+.dose svg{width:15px;height:15px}
+.dose.given{border:1px solid transparent;background:var(--ok-soft);color:var(--ok)}
+.dose.next{border:1px solid transparent;background:var(--c);color:var(--on-strong)}
+.dose.due{border:1px solid var(--warn);background:var(--warn-soft);color:var(--warn)}
+.dose .by{font-weight:400;opacity:.85}
+.course{margin-left:auto;font-size:12px;color:var(--muted);font-weight:700}
+.course.end{color:var(--warn)}
+.bar{height:5px;border-radius:3px;background:var(--line);overflow:hidden}
+.bar i{display:block;height:100%;background:var(--c)}
+
+.c-tab{--c:var(--t-tab);--cs:var(--t-tab-s);--ct:var(--t-tab-t)}
+.c-neb{--c:var(--t-neb);--cs:var(--t-neb-s);--ct:var(--t-neb-t)}
+.c-air{--c:var(--t-air);--cs:var(--t-air-s);--ct:var(--t-air-t)}
+[data-mode="med"] .m-wys{--c:var(--m-wys);--cs:var(--m-wys-s);--ct:var(--m-wys-t)}
+[data-mode="med"] .m-pul{--c:var(--m-pul);--cs:var(--m-pul-s);--ct:var(--m-pul-t)}
+[data-mode="med"] .m-erd{--c:var(--m-erd);--cs:var(--m-erd-s);--ct:var(--m-erd-t)}
+[data-mode="med"] .m-for{--c:var(--m-for);--cs:var(--m-for-s);--ct:var(--m-for-t)}
+[data-mode="med"] .m-rev{--c:var(--m-rev);--cs:var(--m-rev-s);--ct:var(--m-rev-t)}
+[data-mode="med"] .m-max{--c:var(--m-max);--cs:var(--m-max-s);--ct:var(--m-max-t)}
+[data-mode="med"] .m-bip{--c:var(--m-bip);--cs:var(--m-bip-s);--ct:var(--m-bip-t)}
+[data-mode="med"] .m-o2{--c:var(--m-o2);--cs:var(--m-o2-s);--ct:var(--m-o2-t)}
+
+.sec h2{font-size:20px;margin-bottom:10px}
+.box{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:14px;display:flex;flex-direction:column;gap:10px}
+.alert{background:var(--danger-soft);border-color:transparent}
+.alert h2{color:var(--danger)}
+.alert ul{margin:0;padding-left:20px}
+.phone{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+.phone a{font-family:var(--display);font-weight:700;font-size:21px;color:var(--ink);text-decoration:none}
+.btn{border:0;border-radius:12px;padding:12px 16px;font-weight:700;background:var(--brand);color:var(--on-strong)}
+.btn.ghost{background:var(--surface);color:var(--brand);border:1px solid var(--line);padding:8px 12px;font-size:14px}
+.btn.wide{width:100%;height:52px;font-size:17px}
+.kv{display:grid;grid-template-columns:auto minmax(0,1fr);gap:6px 14px;margin:0}
+.kv dt{color:var(--muted)}.kv dd{margin:0}
+.field{display:flex;flex-direction:column;gap:5px;font-size:14px;color:var(--muted)}
+.field input{color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:12px;font-size:17px;min-width:0}
+.times{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.note{font-size:13px;color:var(--muted)}
+
+.planrow{display:grid;grid-template-columns:62px minmax(0,1fr) auto;gap:12px;align-items:center;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:10px 14px;text-align:left;width:100%}
+.planrow.today{border:2px solid var(--brand);padding:9px 13px}
+.planrow .dt{display:flex;flex-direction:column}
+.planrow .dt b{font-family:var(--display);font-size:18px}
+.planrow .dt span{font-size:12px;color:var(--muted)}
+.dots{display:flex;gap:6px}
+.dots i{width:14px;height:14px;border-radius:50%;background:var(--line);display:block}
+.dots i.g{background:#2E9B67}.dots i.p{background:var(--warn)}.dots i.n{background:transparent;border:2px dashed var(--line2)}
+.planrow .cnt{font-size:13px;color:var(--muted);font-weight:700}
+
+nav.tabs{position:fixed;left:0;right:0;bottom:0;z-index:6;background:var(--surface);border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom,0px)}
+nav.tabs .in{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));max-width:560px;margin:0 auto}
+nav.tabs button{border:0;background:transparent;padding:10px 4px 12px;display:flex;flex-direction:column;align-items:center;gap:3px;font-size:13px;color:var(--muted)}
+nav.tabs button svg{width:22px;height:22px}
+nav.tabs button[aria-current="page"]{color:var(--brand);font-weight:700}
+
+.scrim{position:fixed;inset:0;background:rgba(10,14,18,.5);z-index:20;display:flex;align-items:flex-end;justify-content:center}
+.sheet{background:var(--surface);width:100%;max-width:560px;border-radius:24px 24px 0 0;padding:10px 20px calc(env(safe-area-inset-bottom,0px) + 24px);display:flex;flex-direction:column;gap:16px;max-height:88vh;overflow-y:auto;padding-left:max(20px,env(safe-area-inset-left,0px));padding-right:max(20px,env(safe-area-inset-right,0px))}
+.grab{align-self:center;width:40px;height:5px;border-radius:3px;background:var(--line)}
+.sh-hd{display:flex;justify-content:space-between;gap:12px;align-items:center}
+.sh-hd .l{display:flex;gap:12px;align-items:center;min-width:0}
+.sh-hd h2{font-size:24px;line-height:1.1}
+.x{width:40px;height:40px;border-radius:50%;border:0;background:var(--bg);font-size:22px;color:var(--ink2);flex:none}
+.whybox{background:var(--cs);border-radius:16px;padding:16px;display:flex;flex-direction:column;gap:6px}
+.whybox .eyebrow{color:var(--ct)}
+.whybox p{margin:0;font-size:17px;line-height:1.5}
+.caution{background:var(--warn-soft);color:var(--ink);border-radius:14px;padding:12px 14px;font-size:14px}
+.err{color:var(--danger);font-size:14px;font-weight:700}
+
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(env(safe-area-inset-bottom,0px) + 84px);background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:12px;font-size:14px;font-weight:700;z-index:30;max-width:calc(100% - 32px)}
+@media (prefers-reduced-motion: reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<div id="app">
+  <header class="top gut"><div class="wrap" id="hdr"></div></header>
+  <main class="gut"><div class="wrap" id="view" style="display:flex;flex-direction:column;gap:12px"></div></main>
+  <nav class="tabs" aria-label="Sections"><div class="in" id="tabs"></div></nav>
+</div>
+<div id="layer"></div>
+<div id="toast" class="toast" hidden></div>
+
+<script>
+(function(){
+"use strict";
+const SUPABASE_URL="https://ndmkdkvtpbbsiawnuwuv.supabase.co";
+const SUPABASE_KEY="sb_publishable_Lu-_StyBdRFy0Jd5VCmPdw_fiKeeX8m";
+
+const START=new Date(2026,9,17), DAYS=15;
+const I={
+  tab:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><rect x="2.5" y="8" width="19" height="8" rx="4" transform="rotate(-35 12 12)"/><path d="M9.6 8.6l4.8 6.8"/></svg>',
+  neb:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 14h10l-1.5 7h-7z"/><path d="M12 14V9"/><path d="M8 7c0-2 2-2 2-4M12 6c0-2 2-2 2-4M16 7c0-2 2-2 2-4"/></svg>',
+  moon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"/></svg>',
+  air:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v8"/><path d="M12 12c-2 0-3 1-4 3-1 3-3 5-4 4s-1-6 1-9 4-4 5-3"/><path d="M12 12c2 0 3 1 4 3 1 3 3 5 4 4s1-6-1-9-4-4-5-3"/></svg>',
+  o2:'<svg viewBox="0 0 24 24" aria-hidden="true"><text x="2.5" y="17" font-size="14" font-weight="700" fill="currentColor" font-family="system-ui,sans-serif">O</text><text x="13.5" y="20" font-size="9" font-weight="700" fill="currentColor" font-family="system-ui,sans-serif">2</text></svg>',
+  check:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>',
+  info:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7.5v.5"/></svg>',
+  today:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15" rx="3"/><path d="M3.5 10h17M8 3v4M16 3v4"/></svg>',
+  plan:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M8 6h12M8 12h12M8 18h12"/><circle cx="4" cy="6" r="1"/><circle cx="4" cy="12" r="1"/><circle cx="4" cy="18" r="1"/></svg>',
+  help:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s-7-4.4-7-10.5A4.5 4.5 0 0 1 12 7a4.5 4.5 0 0 1 7 3.5C19 16.6 12 21 12 21z"/></svg>'
+};
+const TYPES={tab:{label:'Tablets',icon:'tab'},neb:{label:'Nebuliser',icon:'neb'},air:{label:'Breathing',icon:'air'}};
+const MEDS=[
+  {id:'wys',ab:'Wy',name:'Wysolone',sub:'20 mg tablet',type:'tab',slots:['am','pm'],days:10,line:'Calms swelling in the airways',
+   generic:'Prednisolone 20 mg',why:'A steroid that calms swelling and inflammation inside the airways and lungs, so breathing gets easier while the chest infection settles.',
+   caution:'Finish the 10-day course as written. Check with the doctor before stopping it early.'},
+  {id:'pul',ab:'Pu',name:'Pulmoclear',sub:'tablet',type:'tab',slots:['am','pm'],days:15,line:'Loosens mucus, eases breathing',
+   generic:'Acebrophylline 100 mg + Acetylcysteine 600 mg',why:'Loosens thick mucus so it is easier to cough up, and helps keep the airways open.'},
+  {id:'erd',ab:'Er',name:'Erdosteine',sub:'300 mg tablet',type:'tab',slots:['am','pm'],days:15,line:'Thins sticky phlegm so it clears',
+   generic:'Erdosteine 300 mg',why:'A mucus thinner. It makes sticky phlegm runnier so the chest clears more easily with coughing.'},
+  {id:'for',ab:'Fc',name:'Foracort',sub:'neb 1 mg',type:'neb',slots:['am','pm'],days:15,line:'Reduces swelling, relaxes airways',
+   generic:'Budesonide + Formoterol (respules)',why:'Two medicines in one nebulisation. Budesonide reduces swelling in the airways, and formoterol relaxes the airway muscles so air moves more freely.'},
+  {id:'rev',ab:'Rv',name:'Revesmart',sub:'neb, once daily',type:'neb',slots:['noon'],days:15,line:'Keeps airways open all day',
+   generic:'Revefenacin 175 mcg (respule)',why:'A long-acting medicine taken once a day that keeps the airways open.',
+   caution:'This is not a rescue medicine for sudden breathlessness. For sudden breathlessness, use the emergency numbers in Help.'},
+  {id:'max',ab:'Mx',name:'Maxvryz',sub:'tablet, once daily',type:'tab',slots:['noon'],days:15,line:'Check the strip for its purpose',
+   generic:'Composition not confirmed',why:'We could not confirm what this tablet contains. Its online listing names only the maker, Curyz Lifesciences.',
+   caution:'Check the strip or ask the pharmacist what it contains and why it was prescribed.'},
+  {id:'bip',ab:'Bi',name:'BiPAP',sub:'+ O₂ 1–2 L/min',type:'air',icon:'moon',slots:['night'],days:15,line:'Supports breathing through the night',
+   generic:'BiPAP with oxygen 1–2 L/min, overnight',why:'In hospital her blood test showed carbon dioxide building up (type II respiratory failure). BiPAP supports her breathing during sleep and helps clear that carbon dioxide.'}
+];
+const O2={id:'o2',ab:'O₂',name:'Oxygen',sub:'1–2 L/min',type:'air',icon:'o2',line:'Through the day, as advised',
+  generic:'Oxygen inhalation, 1–2 litres per minute',why:'Her oxygen level was 81% on room air when she was admitted. Extra oxygen keeps it in a safer range while her lungs recover.'};
+const SLOTS=['am','noon','pm','night'];
+const SLOT_NAME={am:'Morning',noon:'Afternoon',pm:'Evening',night:'Bedtime'};
+const W=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'],M=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+
+const ls={get(k,d){try{const v=localStorage.getItem(k);return v==null?d:JSON.parse(v)}catch(e){return d}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
+let me=ls.get('rm-name',''), pin=ls.get('rm-pin',''), mode=ls.get('rm-mode','type');
+let times=Object.assign({am:'08:00',pm:'20:00',night:'22:00'},ls.get('rm-times',{})); times.noon='14:00';
+let log=new Map(Object.entries(ls.get('rm-log',{})));
+let tab='today', filter='all', live=false;
+
+const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const mid=d=>new Date(d.getFullYear(),d.getMonth(),d.getDate());
+const addDays=(d,n)=>new Date(d.getFullYear(),d.getMonth(),d.getDate()+n);
+const dayIdx=d=>Math.round((mid(d)-START)/864e5);
+const key=(d,s,m)=>d+'|'+s+'|'+m;
+const toMin=t=>{const[h,m]=t.split(':').map(Number);return h*60+m};
+function fmt(t,short){let[h,m]=t.split(':').map(Number);const ap=h>=12?'PM':'AM';h=h%12||12;return (m||!short)?h+':'+String(m).padStart(2,'0')+' '+ap:h+' '+ap}
+const clock=ts=>{const d=new Date(ts);return fmt(String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0'))};
+const dateLabel=i=>{const d=addDays(START,i);return W[d.getDay()]+' '+d.getDate()+' '+M[d.getMonth()]};
+const todayIdx=()=>dayIdx(new Date());
+let sel=Math.min(Math.max(todayIdx(),0),DAYS-1);
+
+function cls(m){return 'c-'+m.type+' m-'+m.id}
+function badge(m){const ic=I[m.icon||TYPES[m.type].icon];return '<div class="badge">'+ic+'<span class="ab">'+m.ab+'</span><span class="mini">'+ic+'</span></div>'}
+function slotOrder(){return SLOTS.slice().sort((a,b)=>toMin(times[a])-toMin(times[b]))}
+function medsIn(d,s){return MEDS.filter(m=>m.slots.includes(s)&&d<m.days)}
+function nowMin(){const n=new Date();return n.getHours()*60+n.getMinutes()}
+function doseState(d,s,m){
+  if(log.has(key(d,s,m.id)))return 'given';
+  const t=todayIdx();
+  if(d<t)return 'due';
+  if(d>t)return 'later';
+  return nowMin()>=toMin(times[s])?'due':'later';
+}
+function dayStats(d){let t=0,g=0;SLOTS.forEach(s=>medsIn(d,s).forEach(m=>{t++;if(log.has(key(d,s,m.id)))g++}));return{t,g}}
+function nextSlot(d){
+  for(const s of slotOrder()){const pend=medsIn(d,s).filter(m=>!log.has(key(d,s,m.id)));if(pend.length)return{s,pend,due:doseState(d,s,pend[0])==='due'}}
+  return null;
+}
+
+/* ---------- render ---------- */
+const $=id=>document.getElementById(id);
+function render(){
+  document.documentElement.dataset.mode=mode;
+  renderHeader();renderTabs();
+  if(tab==='today')renderToday();else if(tab==='plan')renderPlan();else renderHelp();
+}
+function renderHeader(){
+  const t=todayIdx();
+  let h='<div class="toprow"><div><div class="eyebrow">'+(tab==='today'?'Day '+(sel+1)+' of 15':tab==='plan'?'17 – 31 Oct':'Mrs. Ramani Bala')+'</div><h1>'+(tab==='today'?(sel===t?'Today, ':'')+dateLabel(sel):tab==='plan'?'15-day plan':'Help &amp; info')+'</h1></div>'+
+    '<div class="sync'+(live?' live':'')+'" role="status"><i></i>'+(live?'Live':'Offline')+'</div></div>';
+  if(tab==='today'){
+    h+='<div class="seg" role="group" aria-label="Colours"><button data-cm="type" aria-pressed="'+(mode==='type')+'">By type</button><button data-cm="med" aria-pressed="'+(mode==='med')+'">Per medicine</button></div>';
+    h+='<div class="strip" id="strip">';
+    for(let i=0;i<DAYS;i++){const d=addDays(START,i),st=dayStats(i);
+      h+='<button class="day'+(i===t?' today':'')+'" data-day="'+i+'" aria-pressed="'+(i===sel)+'" aria-label="Day '+(i+1)+', '+dateLabel(i)+'"><span class="w">'+(i===t?'Today':W[d.getDay()])+'</span><span class="d num">'+d.getDate()+'</span><span class="b"><i style="width:'+(st.t?Math.round(st.g/st.t*100):0)+'%"></i></span></button>'}
+    h+='</div>';
+  }
+  $('hdr').innerHTML=h;
+  $('hdr').querySelectorAll('[data-cm]').forEach(b=>b.onclick=()=>{mode=b.dataset.cm;ls.set('rm-mode',mode);render()});
+  $('hdr').querySelectorAll('[data-day]').forEach(b=>b.onclick=()=>{sel=+b.dataset.day;render()});
+  const s=$('strip');if(s){const c=s.children[sel];if(c)s.scrollLeft=c.offsetLeft-s.clientWidth/2+c.clientWidth/2}
+}
+function renderTabs(){
+  const T=[['today','Today',I.today],['plan','15-day plan',I.plan],['help','Help & info',I.help]];
+  $('tabs').innerHTML=T.map(([k,l,ic])=>'<button data-tab="'+k+'"'+(tab===k?' aria-current="page"':'')+'>'+ic+'<span>'+esc(l)+'</span></button>').join('');
+  $('tabs').querySelectorAll('button').forEach(b=>b.onclick=()=>{tab=b.dataset.tab;if(tab==='today')sel=Math.min(Math.max(todayIdx(),0),DAYS-1);render();window.scrollTo(0,0)});
+}
+function renderToday(){
+  const t=todayIdx();let h='';
+  if(sel===t){
+    const n=nextSlot(sel);
+    if(!n)h+='<div class="next done"><span class="k">Day '+(sel+1)+' complete</span><div class="t">All given</div><div class="names">Every dose for today is ticked.</div></div>';
+    else{
+      const names=n.pend.map(m=>esc(m.name)).join(', ');
+      const late=n.due;
+      h+='<div class="next'+(late?' due':'')+'"><span class="k">'+(late?SLOT_NAME[n.s]+' dose is due':'Next · '+SLOT_NAME[n.s].toLowerCase())+'</span><div class="t num">'+(late?'Due now':fmt(times[n.s]))+'</div><div class="names">'+names+'</div>'+
+        '<button class="go" data-all="'+n.s+'">'+I.check+(n.pend.length>1?'Mark all '+n.pend.length+' given':'Mark given')+'</button></div>';
+    }
+  }
+  h+='<div class="filters" role="group" aria-label="Filter">'+
+    '<button class="chipf" data-f="all" aria-pressed="'+(filter==='all')+'">All</button>'+
+    Object.entries(TYPES).map(([k,v])=>'<button class="chipf" data-f="'+k+'" aria-pressed="'+(filter===k)+'">'+I[v.icon]+v.label+'</button>').join('')+'</div>';
+  const n=sel===t?nextSlot(sel):null;
+  const list=MEDS.filter(m=>sel<m.days&&(filter==='all'||filter===m.type));
+  list.forEach(m=>{
+    const hot=n&&n.pend.includes(m);
+    let doses='';
+    m.slots.forEach(s=>{
+      const st=doseState(sel,s,m),r=log.get(key(sel,s,m.id));
+      const isNext=hot&&n.s===s&&!n.due;
+      const c=st==='given'?'given':isNext?'next':st==='due'?'due':'';
+      const lbl=fmt(times[s],true);
+      const inner=st==='given'?I.check+lbl+(r&&r.by?' <span class="by">· '+esc(r.by)+'</span>':''):st==='due'?lbl+' · due':isNext?lbl+' · next':lbl;
+      doses+='<button class="dose '+c+'" data-d="'+sel+'" data-s="'+s+'" data-m="'+m.id+'" aria-label="'+esc(m.name)+' '+fmt(times[s])+(st==='given'?', given':', not given')+'">'+inner+'</button>';
+    });
+    let course='';
+    if(m.days<DAYS){const left=m.days-1-sel;course='<span class="course'+(left<=2?' end':'')+'">'+(left===0?'Last day':'Ends '+dateLabel(m.days-1).slice(4))+'</span>'}
+    else course='<span class="course">Day '+(sel+1)+' of '+m.days+'</span>';
+    h+='<article class="card '+cls(m)+(hot?' hot':'')+'">'+badge(m)+'<div class="body"><div class="hd"><div><div class="nm">'+esc(m.name)+' <small>'+esc(m.sub)+'</small></div><div class="why">'+esc(m.line)+'</div></div>'+
+      '<button class="whyb" data-why="'+m.id+'" aria-label="Why '+esc(m.name)+'">'+I.info+'Why?</button></div><div class="doses">'+doses+course+'</div>'+
+      (m.days<DAYS?'<div class="bar"><i style="width:'+Math.round((sel+1)/m.days*100)+'%"></i></div>':'')+'</div></article>';
+  });
+  if(filter==='all'||filter==='air')h+='<article class="card '+cls(O2)+'">'+badge(O2)+'<div class="body"><div class="hd"><div><div class="nm">Oxygen <small>1–2 L/min</small></div><div class="why">'+esc(O2.line)+'</div></div><button class="whyb" data-why="o2" aria-label="Why oxygen">'+I.info+'Why?</button></div></div></article>';
+  if(sel>=10&&(filter==='all'||filter==='tab'))h+='<p class="note">Wysolone course finished on Day 10 (Mon 26 Oct).</p>';
+  $('view').innerHTML=h;
+  bindView();
+}
+function renderPlan(){
+  const t=todayIdx();let h='<p class="note">Tap a day to see or tick its doses. Dots show morning, 2 PM, evening and bedtime.</p>';
+  for(let i=0;i<DAYS;i++){
+    const st=dayStats(i),d=addDays(START,i);
+    const dots=slotOrder().map(s=>{const ms=medsIn(i,s);if(!ms.length)return'';const g=ms.filter(m=>log.has(key(i,s,m.id))).length;
+      const past=i<t||(i===t&&nowMin()>=toMin(times[s]));return '<i class="'+(g===ms.length?'g':past?'p':'n')+'" title="'+SLOT_NAME[s]+'"></i>'}).join('');
+    h+='<button class="planrow'+(i===t?' today':'')+'" data-goto="'+i+'"><span class="dt"><b class="num">'+d.getDate()+' '+M[d.getMonth()]+'</b><span>'+(i===t?'Today':W[d.getDay()])+' · Day '+(i+1)+'</span></span><span class="dots">'+dots+'</span><span class="cnt num">'+st.g+'/'+st.t+'</span></button>';
+    if(i===6)h+='<div class="box" style="flex-direction:row;align-items:center;gap:10px;background:var(--brand-soft);border-color:transparent"><b>Sat 24 Oct</b><span class="note" style="color:var(--ink2)">OPD review with Dr. Bhrungi. Book an appointment first.</span></div>';
+    if(i===9)h+='<p class="note" style="margin:0">Wysolone ends after Day 10.</p>';
+  }
+  $('view').innerHTML=h;
+  $('view').querySelectorAll('[data-goto]').forEach(b=>b.onclick=()=>{sel=+b.dataset.goto;tab='today';render();window.scrollTo(0,0)});
+}
+function renderHelp(){
+  let h='<section class="box alert"><h2>Get urgent care if there is</h2><ul><li>Shortness of breath</li><li>Fever</li><li>Cough with sputum</li></ul>'+
+    '<div class="note" style="color:var(--ink2)">Gleneagles Aware emergency, open 24/7</div>'+
+    '<div class="phone"><a href="tel:+914069081111" class="num">+91 40 6908 1111</a><button class="btn ghost" data-copy="+914069081111">Copy</button></div>'+
+    '<div class="phone"><a href="tel:+918297222222" class="num">82972 22222</a><button class="btn ghost" data-copy="+918297222222">Copy</button></div></section>';
+  h+='<section class="sec"><h2>Follow-up</h2><div class="box"><dl class="kv"><dt>Review</dt><dd>OPD after 1 week, around <b>Sat 24 Oct</b>. Book an appointment first.</dd><dt>Doctor</dt><dd>Dr. Sarath Chandra Bhrungi, Pulmonology</dd><dt>Diet</dt><dd>High protein: dairy, eggs, lean meat, dal, soy, nuts. Follow the diet chart from discharge.</dd></dl></div></section>';
+  h+='<section class="sec"><h2>On this phone</h2><div class="box">'+
+    '<label class="field" for="f-name">Your name, shown on ticks<input id="f-name" maxlength="40" value="'+esc(me)+'" autocomplete="given-name"></label>'+
+    '<button class="btn ghost" id="b-name" style="align-self:flex-start">Save name</button>'+
+    '<div class="note">Family PIN is '+(pin?'set on this phone.':'not set yet.')+' <button class="btn ghost" id="b-pin" style="margin-left:6px">'+(pin?'Change':'Enter PIN')+'</button></div></div></section>';
+  h+='<section class="sec"><h2>Dose times for everyone</h2><div class="box"><p class="note" style="margin:0">The discharge summary sets <b>2:00 PM</b> for Revesmart and Maxvryz. It gives no clock times for the twice-daily medicines or BiPAP, so these are defaults. Confirm them with the doctor.</p>'+
+    '<div class="times"><label class="field" for="t-am">Morning<input type="time" id="t-am" value="'+times.am+'"></label><label class="field" for="t-pm">Evening<input type="time" id="t-pm" value="'+times.pm+'"></label><label class="field" for="t-night">Bedtime<input type="time" id="t-night" value="'+times.night+'"></label></div>'+
+    '<button class="btn" id="b-times" style="align-self:flex-start">Save for everyone</button></div></section>';
+  h+='<p class="note">From the Gleneagles Aware discharge summary, 17 Oct 2026. Follow the doctor’s advice if anything here differs.</p>';
+  $('view').innerHTML=h;
+  $('view').querySelectorAll('[data-copy]').forEach(b=>b.onclick=()=>{const v=b.dataset.copy;try{navigator.clipboard.writeText(v).then(()=>toast('Copied '+v),()=>{})}catch(e){}});
+  $('b-name').onclick=()=>{const v=$('f-name').value.trim();if(!v)return toast('Enter a name');me=v;ls.set('rm-name',me);toast('Saved')};
+  $('b-pin').onclick=()=>openSetup(true);
+  $('b-times').onclick=async()=>{
+    const nt={am:$('t-am').value,pm:$('t-pm').value,night:$('t-night').value};
+    if(!nt.am||!nt.pm||!nt.night)return toast('Fill in all three times');
+    if(!pin)return openSetup(true);
+    const{error}=await sb.rpc('set_times',{p_pin:pin,p_times:nt});
+    if(error)return toast(/wrong_pin/.test(error.message)?'Wrong PIN. Enter it again.':'Not saved. Check the connection.');
+    Object.assign(times,nt);ls.set('rm-times',{am:times.am,pm:times.pm,night:times.night});toast('Times saved for everyone');
+  };
+}
+function bindView(){
+  $('view').querySelectorAll('[data-why]').forEach(b=>b.onclick=()=>openWhy(b.dataset.why));
+  $('view').querySelectorAll('[data-f]').forEach(b=>b.onclick=()=>{filter=b.dataset.f;render()});
+  $('view').querySelectorAll('.dose').forEach(b=>b.onclick=()=>{
+    const d=+b.dataset.d,s=b.dataset.s,id=b.dataset.m,m=MEDS.find(x=>x.id===id);
+    if(log.has(key(d,s,id)))confirmUndo(d,s,m);else setDose(d,s,[id],true);
+  });
+  const all=$('view').querySelector('[data-all]');
+  if(all)all.onclick=()=>{const s=all.dataset.all;setDose(sel,s,medsIn(sel,s).filter(m=>!log.has(key(sel,s,m.id))).map(m=>m.id),true)};
+}
+
+/* ---------- sheets ---------- */
+function openSheet(html,onBind){
+  const l=$('layer');l.innerHTML='<div class="scrim" id="scrim"><div class="sheet" role="dialog" aria-modal="true"><div class="grab"></div>'+html+'</div></div>';
+  const close=()=>{l.innerHTML=''};
+  $('scrim').addEventListener('click',e=>{if(e.target.id==='scrim')close()});
+  l.querySelectorAll('[data-close]').forEach(b=>b.onclick=close);
+  if(onBind)onBind(close);
+  const f=l.querySelector('input,button.btn');if(f)setTimeout(()=>f.focus(),50);
+}
+function openWhy(id){
+  const m=id==='o2'?O2:MEDS.find(x=>x.id===id);
+  const when=m.slots?m.slots.map(s=>fmt(times[s])).join(' and '):'Through the day';
+  const course=m.days?(m.days<DAYS?m.days+' days · last dose '+dateLabel(m.days-1):'15 days · until '+dateLabel(DAYS-1)):'Until the review visit';
+  let given='';if(m.slots){let g=0,t=0;for(let d=0;d<m.days;d++)m.slots.forEach(s=>{t++;if(log.has(key(d,s,m.id)))g++});given='<dt>Given</dt><dd>'+g+' of '+t+' doses</dd>'}
+  openSheet('<div class="sh-hd '+cls(m)+'"><div class="l">'+badge(m)+'<div><h2>'+esc(m.name)+'</h2><div class="note">'+esc(m.generic)+'</div></div></div><button class="x" data-close aria-label="Close">×</button></div>'+
+    '<div class="whybox '+cls(m)+'"><span class="eyebrow">Why she takes it</span><p>'+esc(m.why)+'</p></div>'+
+    '<dl class="kv"><dt>When</dt><dd><b>'+when+'</b></dd><dt>Course</dt><dd>'+course+'</dd>'+given+'</dl>'+
+    (m.caution?'<div class="caution">'+esc(m.caution)+'</div>':'')+
+    '<p class="note" style="margin:0">Plain-language summary for family. Dose and timing come from the discharge summary.</p>');
+}
+function confirmUndo(d,s,m){
+  const r=log.get(key(d,s,m.id));
+  openSheet('<div class="sh-hd"><h2>Undo this tick?</h2><button class="x" data-close aria-label="Close">×</button></div>'+
+    '<p style="margin:0">'+esc(m.name)+', '+fmt(times[s])+' on '+dateLabel(d)+' was marked given'+(r&&r.at?' at '+clock(r.at):'')+(r&&r.by?' by '+esc(r.by):'')+'.</p>'+
+    '<div style="display:flex;gap:10px"><button class="btn ghost" data-close style="flex:1;height:52px;font-size:16px">Keep it</button><button class="btn" id="undo" style="flex:1;background:var(--danger);color:var(--surface)">Mark not given</button></div>',
+    close=>{$('undo').onclick=()=>{close();setDose(d,s,[m.id],false)}});
+}
+function openSetup(force){
+  openSheet('<div class="sh-hd"><h2>'+(me&&pin?'Change PIN':'Welcome')+'</h2>'+(force?'<button class="x" data-close aria-label="Close">×</button>':'')+'</div>'+
+    '<p style="margin:0">Everyone at home shares this schedule. Ticks show up on every phone within a few seconds.</p>'+
+    '<label class="field" for="s-name">Your name<input id="s-name" maxlength="40" value="'+esc(me)+'" autocomplete="given-name" placeholder="e.g. Balendu"></label>'+
+    '<label class="field" for="s-pin">Family PIN<input id="s-pin" inputmode="numeric" pattern="[0-9]*" maxlength="8" autocomplete="off" placeholder="4 digits"></label>'+
+    '<div class="err" id="s-err" hidden></div><button class="btn wide" id="s-go">Continue</button>',
+    close=>{
+      const go=async()=>{
+        const n=$('s-name').value.trim(),p=$('s-pin').value.trim(),err=$('s-err');err.hidden=true;
+        if(!n){err.textContent='Enter your name.';err.hidden=false;return}
+        if(!/^\d{4,8}$/.test(p)){err.textContent='Enter the 4-digit family PIN.';err.hidden=false;return}
+        $('s-go').disabled=true;$('s-go').textContent='Checking…';
+        const{data,error}=await sb.rpc('verify_pin',{p_pin:p});
+        $('s-go').disabled=false;$('s-go').textContent='Continue';
+        if(error){err.textContent='Could not reach the server. Check the internet connection.';err.hidden=false;return}
+        if(!data){err.textContent='That PIN is not right. Ask Balendu for the family PIN.';err.hidden=false;return}
+        me=n;pin=p;ls.set('rm-name',me);ls.set('rm-pin',pin);close();render();toast('Welcome, '+me);
+      };
+      $('s-go').onclick=go;$('s-pin').addEventListener('keydown',e=>{if(e.key==='Enter')go()});
+    });
+}
+let tt;function toast(msg){const t=$('toast');t.textContent=msg;t.hidden=false;clearTimeout(tt);tt=setTimeout(()=>t.hidden=true,2400)}
+
+/* ---------- data ---------- */
+const sb=window.supabase?window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY,{auth:{persistSession:false}}):null;
+function saveLocal(){ls.set('rm-log',Object.fromEntries(log))}
+async function setDose(d,s,ids,given){
+  if(!ids.length)return;
+  if(!pin||!me)return openSetup();
+  const prev=ids.map(id=>[id,log.get(key(d,s,id))]);
+  ids.forEach(id=>given?log.set(key(d,s,id),{at:new Date().toISOString(),by:me}):log.delete(key(d,s,id)));
+  render();
+  if(navigator.vibrate)try{navigator.vibrate(15)}catch(e){}
+  const{error}=sb?await sb.rpc('set_dose',{p_pin:pin,p_day:d,p_slot:s,p_meds:ids,p_given:given,p_by:me}):{error:{message:'offline'}};
+  if(error){
+    prev.forEach(([id,v])=>v?log.set(key(d,s,id),v):log.delete(key(d,s,id)));render();
+    if(/wrong_pin/.test(error.message)){pin='';ls.set('rm-pin','');openSetup();toast('PIN changed. Enter the new one.')}
+    else toast('Not saved: no connection. Try again.');
+    return;
+  }
+  saveLocal();
+  toast(given?(ids.length>1?ids.length+' doses marked given':'Marked given'):'Tick removed');
+}
+async function load(){
+  if(!sb)return;
+  const[a,b]=await Promise.all([sb.from('dose_log').select('day,slot,med_id,given_at,given_by'),sb.from('settings').select('key,value')]);
+  if(a.error||b.error){live=false;renderHeader();return}
+  log=new Map(a.data.map(r=>[key(r.day,r.slot,r.med_id),{at:r.given_at,by:r.given_by}]));saveLocal();
+  const t=(b.data.find(x=>x.key==='times')||{}).value;if(t){times=Object.assign(times,t);times.noon='14:00';ls.set('rm-times',t)}
+  if(tab!=='help')render();else renderHeader();
+}
+let ch;
+function subscribe(){
+  if(!sb)return;
+  if(ch)sb.removeChannel(ch);
+  let timer;const soon=()=>{clearTimeout(timer);timer=setTimeout(load,250)};
+  ch=sb.channel('ramani-meds').on('postgres_changes',{event:'*',schema:'public',table:'dose_log'},soon).on('postgres_changes',{event:'*',schema:'public',table:'settings'},soon)
+    .subscribe(st=>{live=st==='SUBSCRIBED';renderHeader();if(live)load()});
+}
+
+render();
+if(!sb){toast('Offline. Showing the last saved ticks.')}
+else{load();subscribe()}
+if(!me||!pin)setTimeout(()=>openSetup(false),300);
+setInterval(()=>{if(tab!=='help'&&!document.querySelector('#layer .scrim'))render()},60000);
+document.addEventListener('visibilitychange',()=>{if(!document.hidden){load();if(!live)subscribe()}});
+window.addEventListener('online',()=>{load();subscribe()});
+if('serviceWorker' in navigator)window.addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}));
+})();
+</script>
+</body>
+</html>
