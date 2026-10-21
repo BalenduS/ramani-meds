@@ -141,6 +141,9 @@ main{padding-top:6px;padding-bottom:calc(env(safe-area-inset-bottom,0px) + 96px)
 .install .tx{flex:1;min-width:0;font-size:14px;color:var(--ink2)}
 .install .tx b{display:block;color:var(--ink);font-size:16px}
 .install .x{width:36px;height:36px;font-size:20px}
+.tog{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:6px 0}
+.tog span{min-width:0}.tog small{display:block;color:var(--muted);font-size:13px}
+.tog input{width:48px;height:28px;accent-color:var(--brand);flex:none}
 .steps{margin:0;padding-left:22px;display:flex;flex-direction:column;gap:10px;font-size:16px}
 .stockb{border:0;background:var(--bg);color:var(--ink2);border-radius:8px;padding:5px 9px;font-size:13px;font-weight:700;min-height:32px}
 .stockb.low{background:var(--warn-soft);color:var(--warn)}
@@ -225,6 +228,7 @@ nav.tabs button[aria-current="page"]{color:var(--brand);font-weight:700}
 "use strict";
 const SUPABASE_URL="https://ndmkdkvtpbbsiawnuwuv.supabase.co";
 const SUPABASE_KEY="sb_publishable_Lu-_StyBdRFy0Jd5VCmPdw_fiKeeX8m";
+const VAPID="BEVKAhZNxV2UsfFGxSNybgILKDc3Vi_Qt4DO0LNuX8rSSHgy79F-1wodZCEGISywfntxfnQGvtYlfajM-9zlULs";
 
 const START=new Date(2026,9,18), DAYS=15;
 const I={
@@ -239,6 +243,7 @@ const I={
   plan:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M8 6h12M8 12h12M8 18h12"/><circle cx="4" cy="6" r="1"/><circle cx="4" cy="12" r="1"/><circle cx="4" cy="18" r="1"/></svg>',
   pulse:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12h4l2-5 4 10 2-5h6"/></svg>',
   dl:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v11M7 10l5 5 5-5M5 20h14"/></svg>',
+  bell:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 16V11a6 6 0 0 1 12 0v5l1.5 2h-15z"/><path d="M10 20a2 2 0 0 0 4 0"/></svg>',
   help:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s-7-4.4-7-10.5A4.5 4.5 0 0 1 12 7a4.5 4.5 0 0 1 7 3.5C19 16.6 12 21 12 21z"/></svg>'
 };
 const TYPES={tab:{label:'Tablets',icon:'tab'},neb:{label:'Nebuliser',icon:'neb'},air:{label:'Breathing',icon:'air'}};
@@ -283,6 +288,7 @@ let me=ls.get('rm-name',''), pin=ls.get('rm-pin',''), mode=ls.get('rm-mode','typ
 let times=Object.assign({am:'08:00',pm:'20:00',night:'22:00'},ls.get('rm-times',{})); times.noon='14:00'; times.dawn='06:00';
 let log=new Map(Object.entries(ls.get('rm-log',{})));
 let tab='today', filter='all', live=false, deferredInstall=null, installHidden=ls.get('rm-inst-hide',false);
+let push=ls.get('rm-push',{on:false,activity:true,reminders:true}), pushHidden=ls.get('rm-push-hide',false);
 let stock=ls.get('rm-stock',{}), spo=new Map(Object.entries(ls.get('rm-spo',{}))), srvStock=false, srvSpo=false;
 
 const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -412,6 +418,7 @@ function renderPlan(){
 }
 function renderHelp(){
   let h=(isStandalone()?'':'<section class="sec"><h2>Install on this phone</h2><div class="install"><span style="color:var(--brand);display:grid">'+I.dl+'</span><div class="tx"><b>Add to home screen</b>Opens like an app, full screen, one tap away.</div><button class="btn" data-install>Install</button></div></section>');
+  h+=pushSection();
   h+='<section class="sec"><h2>Medicines at home</h2><div class="box">'+MEDS.filter(m=>UNIT[m.type]).map(m=>{const so=stockOf(m);
     return '<div class="stockrow"><div><b>'+esc(m.name)+'</b><div class="q'+(so&&so.low?' low':'')+'">'+(so?so.left+' '+UNIT[m.type]+' · about '+so.days+' day'+(so.days===1?'':'s'):'Not counted yet')+'</div></div><span></span><button class="btn ghost" data-stock="'+m.id+'">'+(so?'Update':'Add')+'</button></div>'}).join('')+
     '<p class="note" style="margin:0">Enter how many are in the house. The count goes down by one with every tick.'+(srvStock?' Shared with everyone.':' Saved on this phone until the database update is done.')+'</p></div></section>';
@@ -429,9 +436,9 @@ function renderHelp(){
     '<button class="btn" id="b-times" style="align-self:flex-start">Save for everyone</button></div></section>';
   h+='<p class="note">From the Gleneagles Aware discharge summary, 17 Oct 2026. Follow the doctor’s advice if anything here differs.</p>';
   $('view').innerHTML=h;
-  bindInstall();bindStock();
+  bindInstall();bindStock();bindPush();
   $('view').querySelectorAll('[data-copy]').forEach(b=>b.onclick=()=>{const v=b.dataset.copy;try{navigator.clipboard.writeText(v).then(()=>toast('Copied '+v),()=>{})}catch(e){}});
-  $('b-name').onclick=()=>{const v=$('f-name').value.trim();if(!v)return toast('Enter a name');me=v;ls.set('rm-name',me);toast('Saved')};
+  $('b-name').onclick=()=>{const v=$('f-name').value.trim();if(!v)return toast('Enter a name');me=v;ls.set('rm-name',me);if(push.on)savePush(true);toast('Saved')};
   $('b-pin').onclick=()=>openSetup(true);
   $('b-times').onclick=async()=>{
     const nt={am:$('t-am').value,pm:$('t-pm').value,night:$('t-night').value};
@@ -533,14 +540,67 @@ async function saveSpo(d,id,val,pr){
     return toast(/wrong_pin/.test(error.message)?'Wrong PIN. Enter it again.':'Not saved: no connection. Try again.')}
   saveLocal();toast('SpO₂ '+val+'% saved');
 }
+/* ---------- notifications ---------- */
+function pushSupported(){return 'serviceWorker' in navigator&&'PushManager' in window&&'Notification' in window}
+function u8(b){const p='='.repeat((4-b.length%4)%4),s=atob((b+p).replace(/-/g,'+').replace(/_/g,'/'));return Uint8Array.from(s,c=>c.charCodeAt(0))}
+function pushSection(){
+  let body;
+  if(!pushSupported())body=isIOS&&!isStandalone()
+    ?'<p style="margin:0">On iPhone, notifications work after the app is installed. Install it from the button above, open it from the home screen, then turn notifications on here.</p>'
+    :'<p style="margin:0">This browser can’t show notifications. Try Chrome on Android, or install the app on iPhone.</p>';
+  else if(!push.on)body='<p style="margin:0">Get a notification when anyone ticks a dose, logs SpO₂ or updates stock, plus a reminder 10 minutes before each dose and check, and another 30 minutes after if it isn’t ticked.</p><button class="btn" data-push-on style="align-self:flex-start">Turn on notifications</button>';
+  else body='<label class="tog" for="pn-a"><span>Updates from family<small>Ticks, SpO₂ readings, stock and time changes</small></span><input type="checkbox" id="pn-a"'+(push.activity?' checked':'')+'></label>'+
+    '<label class="tog" for="pn-r"><span>Reminders<small>10 min before, and 30 min after if not ticked</small></span><input type="checkbox" id="pn-r"'+(push.reminders?' checked':'')+'></label>'+
+    '<div style="display:flex;gap:10px;flex-wrap:wrap"><button class="btn ghost" id="pn-test">Send a test</button><button class="btn ghost" id="pn-off">Turn off on this phone</button></div>';
+  return '<section class="sec"><h2>Notifications on this phone</h2><div class="box">'+body+'</div></section>';
+}
+function bindPush(){
+  const a=$('pn-a'),r=$('pn-r');
+  if(a)a.onchange=()=>{push.activity=a.checked;ls.set('rm-push',push);savePush(true)};
+  if(r)r.onchange=()=>{push.reminders=r.checked;ls.set('rm-push',push);savePush(true)};
+  if($('pn-test'))$('pn-test').onclick=async()=>{const sub=await currentSub();if(!sub)return toast('Turn notifications on again');
+    const{error}=await sb.rpc('test_push',{p_pin:pin,p_endpoint:sub.endpoint});toast(error?'Could not send. Check the connection.':'Test sent. It should arrive in a few seconds.')};
+  if($('pn-off'))$('pn-off').onclick=async()=>{const sub=await currentSub();
+    if(sub){const j=sub.toJSON();try{await sb.rpc('save_push',{p_pin:pin,p_endpoint:j.endpoint,p_p256dh:j.keys.p256dh,p_auth:j.keys.auth,p_name:me,p_activity:false,p_reminders:false})}catch(e){}}
+    push.on=false;ls.set('rm-push',push);render();toast('Notifications off on this phone')};
+}
+async function currentSub(){try{const reg=await navigator.serviceWorker.ready;return await reg.pushManager.getSubscription()}catch(e){return null}}
+async function enablePush(){
+  if(!pushSupported()){
+    if(isIOS&&!isStandalone())return openSheet('<div class="sh-hd"><h2>Install first</h2><button class="x" data-close aria-label="Close">×</button></div><p style="margin:0">On iPhone, notifications work only from the installed app.</p><button class="btn wide" id="go-inst">Show me how</button>',close=>{$('go-inst').onclick=()=>{close();doInstall()}});
+    return toast('This browser can’t show notifications');
+  }
+  if(!pin||!me)return openSetup();
+  let perm;try{perm=await Notification.requestPermission()}catch(e){perm='denied'}
+  if(perm!=='granted')return openSheet('<div class="sh-hd"><h2>Notifications are blocked</h2><button class="x" data-close aria-label="Close">×</button></div><p style="margin:0">Allow notifications for this app in the phone’s Settings, then tap Turn on again.</p>');
+  push.activity=push.activity!==false;push.reminders=push.reminders!==false;if(!push.activity&&!push.reminders){push.activity=true;push.reminders=true}
+  const ok=await savePush(false);
+  if(ok){push.on=true;ls.set('rm-push',push);render();toast('Notifications on')}
+}
+async function savePush(quiet){
+  try{
+    const reg=await navigator.serviceWorker.ready;
+    let sub=await reg.pushManager.getSubscription();
+    if(!sub)sub=await reg.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:u8(VAPID)});
+    const j=sub.toJSON();
+    const{error}=await sb.rpc('save_push',{p_pin:pin,p_endpoint:j.endpoint,p_p256dh:j.keys.p256dh,p_auth:j.keys.auth,p_name:me,p_activity:!!push.activity,p_reminders:!!push.reminders});
+    if(error){if(!quiet)toast(/wrong_pin/.test(error.message)?'Wrong PIN. Enter it again.':'Could not turn on. Check the connection.');return false}
+    return true;
+  }catch(e){if(!quiet)toast('Could not turn on notifications on this phone.');return false}
+}
+
 /* ---------- install ---------- */
 function isStandalone(){try{return matchMedia('(display-mode: standalone)').matches||navigator.standalone===true}catch(e){return false}}
 const isIOS=/iphone|ipad|ipod/i.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
 function installBanner(){
+  if(!push.on&&!pushHidden&&pushSupported()&&(isStandalone()||!isIOS))
+    return '<div class="install"><span style="color:var(--brand);display:grid">'+I.bell+'</span><div class="tx"><b>Turn on notifications</b>Get family updates and a reminder before and after each dose.</div><button class="btn" data-push-on style="padding:10px 14px">Turn on</button><button class="x" data-push-x aria-label="Hide">×</button></div>';
   if(isStandalone()||installHidden)return'';
   return '<div class="install"><span style="color:var(--brand);display:grid">'+I.dl+'</span><div class="tx"><b>Install the app</b>Add it to the home screen for one-tap access.</div><button class="btn" data-install style="padding:10px 14px">Install</button><button class="x" data-inst-x aria-label="Hide">×</button></div>';
 }
-function bindInstall(){$('view').querySelectorAll('[data-install]').forEach(b=>b.onclick=doInstall)}
+function bindInstall(){$('view').querySelectorAll('[data-install]').forEach(b=>b.onclick=doInstall);
+  $('view').querySelectorAll('[data-push-on]').forEach(b=>b.onclick=enablePush);
+  const px=$('view').querySelector('[data-push-x]');if(px)px.onclick=()=>{pushHidden=true;ls.set('rm-push-hide',true);render()};}
 async function doInstall(){
   if(deferredInstall){
     deferredInstall.prompt();
@@ -651,6 +711,7 @@ render();
 if(!sb){toast('Offline. Showing the last saved ticks.')}
 else{load();subscribe()}
 if(!me||!pin)setTimeout(()=>openSetup(false),300);
+if(push.on&&pushSupported()&&me&&pin)setTimeout(()=>savePush(true),1500);
 setInterval(()=>{if(tab!=='help'&&!document.querySelector('#layer .scrim'))render()},60000);
 document.addEventListener('visibilitychange',()=>{if(!document.hidden){load();if(!live)subscribe()}});
 window.addEventListener('online',()=>{load();subscribe()});
