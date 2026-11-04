@@ -84,22 +84,30 @@ async function handleEvent(p: any) {
     const r = rows[0];
     const low = r.v != null && r.alert != null && r.v < r.alert;
     const sp = r.v != null ? `SpO₂ ${r.v}% ${ctxName(r.ctx)}${r.p ? `, pulse ${r.p}` : ""}` : "";
-    const by = `by ${r.by || "someone"}`;
+    const fl = (v: unknown) => (v == null ? "" : `${Number(v)} L/min`);
+    let by = `by ${r.by || "someone"}`;
+    if (r.backdated && r.at) {
+      const d = new Date(new Date(r.at).getTime() + 5.5 * 3600e3);
+      by += ` · for ${fmt(`${d.getUTCHours()}:${String(d.getUTCMinutes()).padStart(2, "0")}`)}`;
+    }
     let title: string, body: string;
-    if (r.k === "break") {
+    if (r.k !== "break" && r.prev === r.k) {
+      title = `Oxygen flow changed to ${fl(r.flow)}`;
+      body = [r.prevflow != null ? `Was ${fl(r.prevflow)}` : "", by].filter(Boolean).join(" · ");
+    } else if (r.k === "break") {
       title = low ? `Low SpO₂ ${r.v}% · break started` : "Oxygen break started";
       body = [sp, r.remind ? `reminder in ${r.remind} min` : "", by].filter(Boolean).join(" · ");
     } else if (r.k === "bipap") {
-      title = "Oxygen + BiPAP started";
+      title = `Oxygen + BiPAP started${r.flow ? ` · ${fl(r.flow)}` : ""}`;
       body = [sp, by].filter(Boolean).join(" · ");
     } else if (r.prev === "break") {
-      title = low ? `Low SpO₂ ${r.v}% after the break` : "Break over · oxygen back on";
+      title = low ? `Low SpO₂ ${r.v}% after the break` : `Break over · oxygen back on${r.flow ? ` · ${fl(r.flow)}` : ""}`;
       body = [sp, r.mins != null ? `${r.mins} min off oxygen` : "", by].filter(Boolean).join(" · ");
     } else if (r.prev === "bipap") {
       title = "BiPAP off · oxygen continues";
       body = by;
     } else {
-      title = "Oxygen on";
+      title = `Oxygen on${r.flow ? ` · ${fl(r.flow)}` : ""}`;
       body = [sp, by].filter(Boolean).join(" · ");
     }
     // A low reading goes to everyone, including the person who logged it.

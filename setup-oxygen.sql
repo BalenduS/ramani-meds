@@ -51,3 +51,10 @@ create policy "read spo2_log" on public.spo2_log for select to anon, authenticat
 -- The existing pg_cron job "ramani-remind" (every 5 min) now sends break reminders and
 -- morning/night dose reminders for the new plan.
 alter publication supabase_realtime add table public.med_log2, public.o2_event, public.spo2_log;
+
+-- 4 Nov 2026 (later): oxygen flow and correcting times.
+alter table public.o2_event add column flow numeric(3,1) check (flow > 0 and flow <= 15);
+-- o2_add(..., p_flow numeric default null, p_at timestamptz default null): flow in L/min, and an optional
+--   earlier time (up to 48 h back) when something is logged late.
+-- o2_edit(pin, id, at, flow): fix the time or flow of an entry (up to 7 days back).
+-- A flow change is a new 'on' or 'bipap' event with the new flow.
