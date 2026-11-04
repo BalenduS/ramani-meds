@@ -212,6 +212,109 @@ nav.tabs button[aria-current="page"]{color:var(--brand);font-weight:700}
 
 .toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(env(safe-area-inset-bottom,0px) + 84px);background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:12px;font-size:14px;font-weight:700;z-index:30;max-width:calc(100% - 32px)}
 @media (prefers-reduced-motion: reduce){*{transition:none!important}}
+/* ---------- 31 Oct plan: oxygen, breaks, SpO₂ history ---------- */
+[data-mode="med"] .m-wy2{--c:var(--m-wys);--cs:var(--m-wys-s);--ct:var(--m-wys-t)}
+[data-mode="med"] .m-ezd{--c:var(--m-erd);--cs:var(--m-erd-s);--ct:var(--m-erd-t)}
+[data-mode="med"] .m-azf{--c:var(--m-rev);--cs:var(--m-rev-s);--ct:var(--m-rev-t)}
+.o2h{border-radius:20px;padding:16px;display:flex;flex-direction:column;gap:12px;background:var(--c);color:var(--on-strong)}
+.o2h.on{--c:var(--m-o2)}.o2h.bipap{--c:var(--m-bip)}
+.o2h.brk{--c:var(--warn);background:var(--warn-soft);color:var(--ink);border:2px solid var(--warn);padding:15px}
+.o2h.unk{--c:var(--brand);background:var(--surface);color:var(--ink);border:1px solid var(--line)}
+.o2h .k{display:flex;justify-content:space-between;align-items:center;gap:8px;font-size:13px;font-weight:700;letter-spacing:.06em;text-transform:uppercase}
+.o2h .k .l{display:flex;align-items:center;gap:8px}
+.o2h .k svg{width:16px;height:16px}
+.o2h .k .r{letter-spacing:0;text-transform:none;opacity:.9}
+.o2h.brk .k .l,.o2h.brk .k .r{color:var(--warn)}
+.livedot{width:10px;height:10px;border-radius:50%;background:#9FE3C2;box-shadow:0 0 0 4px rgba(159,227,194,.25)}
+.o2h .big{font-family:var(--display);font-weight:700;font-size:44px;line-height:1;font-variant-numeric:tabular-nums}
+.o2h.brk .big{font-size:56px}
+.o2h .sub{font-size:15px;margin-top:4px;opacity:.92}
+.o2h.brk .sub,.o2h.unk .sub{color:var(--ink2);opacity:1}
+.o2h .rd{display:flex;gap:10px;align-items:center;background:color-mix(in srgb,var(--on-strong) 15%,transparent);border-radius:12px;padding:10px 12px;font-size:14px;line-height:1.3}
+.o2h.brk .rd,.o2h.unk .rd{background:var(--surface);color:var(--ink)}
+.o2h .rd svg{width:20px;height:20px;flex:none}
+.o2h .rd .o{opacity:.85}
+.o2h.brk .rd .o,.o2h.unk .rd .o{color:var(--muted);opacity:1}
+.acts{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.acts .full{grid-column:1/-1}
+.a1,.a2{min-height:52px;border-radius:14px;font-weight:700;font-size:16px;display:flex;gap:8px;align-items:center;justify-content:center;padding:6px 10px;text-align:center}
+.a1{border:0;background:var(--surface);color:var(--c)}
+.a2{border:1.5px solid currentColor;background:transparent;color:inherit}
+.o2h.brk .a1,.o2h.unk .a1{background:var(--c);color:var(--surface)}
+.o2h.unk .a2{color:var(--brand)}
+.a1 svg,.a2 svg{width:20px;height:20px;flex:none}
+.lnk{border:0;background:none;padding:6px 0;font-weight:700;font-size:15px;color:inherit;text-decoration:underline;text-underline-offset:3px;align-self:flex-start;min-height:44px}
+.prog{height:8px;border-radius:4px;background:color-mix(in srgb,var(--warn) 20%,transparent);overflow:hidden}
+.prog i{display:block;height:100%;background:var(--warn)}
+.progl{display:flex;justify-content:space-between;font-size:13px;font-weight:700;color:var(--warn);margin-top:6px}
+.tl{display:flex;height:18px;border-radius:6px;overflow:hidden;background:repeating-linear-gradient(135deg,var(--bg) 0 6px,var(--line) 6px 12px)}
+.tl span{display:block;height:100%}
+.tlax{display:flex;justify-content:space-between;font-size:12px;color:var(--muted);font-weight:700}
+.legend{display:flex;gap:14px;flex-wrap:wrap;font-size:13px;color:var(--ink2)}
+.legend span{display:flex;align-items:center;gap:6px}
+.legend i{width:10px;height:10px;border-radius:3px;display:block}
+.boxhd{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
+.boxhd h2{font-size:18px}
+.boxhd span{font-size:13px;color:var(--muted);font-weight:700;text-align:right}
+.evrow{display:grid;grid-template-columns:74px 12px minmax(0,1fr);gap:10px;align-items:start;padding:9px 0;border:0;border-top:1px solid var(--line);width:100%;background:none;text-align:left;font:inherit;color:inherit}
+.evrow .t{font-size:14px;font-weight:700;color:var(--ink2);font-variant-numeric:tabular-nums}
+.evrow .dot{width:12px;height:12px;border-radius:50%;margin-top:4px}
+.evrow b{font-size:15px;display:block}
+.evrow small{font-size:13px;color:var(--muted)}
+.numin{display:flex;align-items:baseline;gap:4px;border:2px solid var(--line2);border-radius:14px;padding:8px 14px;background:var(--bg)}
+.numin:focus-within{border-color:var(--brand)}
+.numin input{width:84px;min-width:0;border:0;outline:0;background:transparent;font-family:var(--display);font-size:40px;font-weight:700;color:var(--ink);padding:0}
+.numin.sm input{font-size:30px;width:66px}
+.numin span{font-size:18px;font-weight:700;color:var(--muted)}
+.numin input::-webkit-outer-spin-button,.numin input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}.numin input{-moz-appearance:textfield;appearance:textfield}
+.lowpill{display:inline-block;background:var(--danger-soft);color:var(--danger);font-size:12px;font-weight:700;border-radius:999px;padding:1px 8px;margin-left:4px}
+.pair{display:grid;grid-template-columns:1.3fr 1fr;gap:10px}
+.pair label{display:flex;flex-direction:column;gap:6px;font-size:14px;font-weight:700;color:var(--ink2)}
+.chips{display:flex;gap:8px;flex-wrap:wrap}
+.chips button{min-height:44px;border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:0 16px;font-size:15px;font-weight:700;color:var(--ink2)}
+.chips button[aria-pressed="true"]{background:var(--ink);border-color:var(--ink);color:var(--bg)}
+.cmp{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:8px;background:var(--bg);border-radius:14px;padding:12px;text-align:center}
+.cmp b{font-family:var(--display);font-size:26px;display:block}
+.cmp small{font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase}
+.cmp svg{width:22px;height:22px;color:var(--muted)}
+.lowtxt{color:var(--danger)!important}
+.lowbox{background:var(--danger-soft);color:var(--ink);border-radius:12px;padding:10px 12px;font-size:14px}
+.eyebrow.o2c{color:var(--m-o2)}.eyebrow.wc{color:var(--warn)}.eyebrow.bc{color:var(--m-bip)}
+.tiles{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.tile{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:10px}
+.tile b{font-family:var(--display);font-size:24px;display:block}
+.tile small{font-size:12px;font-weight:700;color:var(--muted)}
+.lrow{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;align-items:center;padding:10px 0;border:0;border-top:1px solid var(--line);width:100%;background:none;text-align:left;font:inherit;color:inherit}
+.lrow:first-of-type{border-top:0}
+.lrow b{font-size:15px}
+.lrow small{display:block;font-size:13px;color:var(--muted)}
+.lrow .rt{text-align:right;font-variant-numeric:tabular-nums}
+.tag{font-size:12px;font-weight:700;border-radius:999px;padding:2px 9px;display:inline-block;white-space:nowrap}
+.tag.o2{background:var(--m-o2-s);color:var(--m-o2-t)}.tag.air{background:var(--warn-soft);color:var(--warn)}.tag.old{background:var(--bg);color:var(--ink2)}
+.tag.new{background:var(--brand-soft);color:var(--brand)}.tag.chg{background:var(--warn-soft);color:var(--warn)}.tag.same{background:var(--ok-soft);color:var(--ok)}
+.navrow{display:flex;align-items:center;gap:12px;background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:14px;width:100%;text-align:left;font:inherit;color:inherit}
+.navrow .ic{width:44px;height:44px;border-radius:12px;background:var(--m-o2-s);color:var(--m-o2-t);display:grid;place-items:center;flex:none}
+.navrow svg{width:22px;height:22px;flex:none}
+.navrow>svg,.navrow>span>svg{color:var(--muted)}
+.navrow .tx{flex:1;min-width:0}.navrow .tx b{display:block;font-size:17px}.navrow .tx span{font-size:14px;color:var(--ink2)}
+.back{display:flex;align-items:center;gap:4px;border:0;background:none;color:var(--brand);font-weight:700;font-size:15px;padding:8px 0;min-height:44px}
+.back svg{width:20px;height:20px}
+.chart{width:100%;height:auto;display:block}
+.chart text{fill:var(--muted);font-family:var(--body);font-size:11px;font-weight:700}
+.chart .grid{stroke:var(--line)}
+.planbox{border:2px solid var(--brand);padding:13px}
+.kvl{display:flex;flex-direction:column;gap:6px;font-size:14px}
+.kvl div{display:flex;justify-content:space-between;gap:10px}.kvl span:last-child{color:var(--muted);text-align:right}
+.stat3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.stat3 div{background:var(--bg);border-radius:10px;padding:8px}
+.stat3 b{font-family:var(--display);font-size:18px;display:block}.stat3 small{font-size:12px;color:var(--muted);font-weight:700}
+.ro{border:1px solid transparent!important;cursor:default}
+@media print{
+  nav.tabs,.sync,.noprint,#layer,#toast{display:none!important}
+  header.top{position:static}
+  html,body{background:#fff;color:#000}
+  main{padding-bottom:0}
+}
 </style>
 </head>
 <body>
@@ -229,82 +332,112 @@ nav.tabs button[aria-current="page"]{color:var(--brand);font-weight:700}
 const SUPABASE_URL="https://ndmkdkvtpbbsiawnuwuv.supabase.co";
 const SUPABASE_KEY="sb_publishable_Lu-_StyBdRFy0Jd5VCmPdw_fiKeeX8m";
 const VAPID="BEVKAhZNxV2UsfFGxSNybgILKDc3Vi_Qt4DO0LNuX8rSSHgy79F-1wodZCEGISywfntxfnQGvtYlfajM-9zlULs";
-
-const START=new Date(2026,9,18), DAYS=15;
+const PLAN_START='2026-10-31';
 const I={
   tab:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><rect x="2.5" y="8" width="19" height="8" rx="4" transform="rotate(-35 12 12)"/><path d="M9.6 8.6l4.8 6.8"/></svg>',
   neb:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 14h10l-1.5 7h-7z"/><path d="M12 14V9"/><path d="M8 7c0-2 2-2 2-4M12 6c0-2 2-2 2-4M16 7c0-2 2-2 2-4"/></svg>',
   moon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"/></svg>',
-  air:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v8"/><path d="M12 12c-2 0-3 1-4 3-1 3-3 5-4 4s-1-6 1-9 4-4 5-3"/><path d="M12 12c2 0 3 1 4 3 1 3 3 5 4 4s1-6-1-9-4-4-5-3"/></svg>',
-  o2:'<svg viewBox="0 0 24 24" aria-hidden="true"><text x="2.5" y="17" font-size="14" font-weight="700" fill="currentColor" font-family="system-ui,sans-serif">O</text><text x="13.5" y="20" font-size="9" font-weight="700" fill="currentColor" font-family="system-ui,sans-serif">2</text></svg>',
+  sun:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>',
+  pause:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><rect x="6" y="5" width="4" height="14" rx="1"/><rect x="14" y="5" width="4" height="14" rx="1"/></svg>',
+  play:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><path d="M7 4v16l13-8z"/></svg>',
+  arrow:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>',
+  chev:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg>',
+  back:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg>',
   check:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>',
   info:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7.5v.5"/></svg>',
   today:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15" rx="3"/><path d="M3.5 10h17M8 3v4M16 3v4"/></svg>',
-  plan:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M8 6h12M8 12h12M8 18h12"/><circle cx="4" cy="6" r="1"/><circle cx="4" cy="12" r="1"/><circle cx="4" cy="18" r="1"/></svg>',
+  hist:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="4" width="16" height="5" rx="1"/><path d="M5 9v10h14V9M10 13h4"/></svg>',
   pulse:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12h4l2-5 4 10 2-5h6"/></svg>',
   dl:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v11M7 10l5 5 5-5M5 20h14"/></svg>',
   bell:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 16V11a6 6 0 0 1 12 0v5l1.5 2h-15z"/><path d="M10 20a2 2 0 0 0 4 0"/></svg>',
-  help:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s-7-4.4-7-10.5A4.5 4.5 0 0 1 12 7a4.5 4.5 0 0 1 7 3.5C19 16.6 12 21 12 21z"/></svg>'
+  help:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s-7-4.4-7-10.5A4.5 4.5 0 0 1 12 7a4.5 4.5 0 0 1 7 3.5C19 16.6 12 21 12 21z"/></svg>',
+  warn:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l9 16H3zM12 10v4M12 17h.01"/></svg>'
 };
-const TYPES={tab:{label:'Tablets',icon:'tab'},neb:{label:'Nebuliser',icon:'neb'},air:{label:'Breathing',icon:'air'}};
+const TYPES={tab:{icon:'tab'},neb:{icon:'neb'}};
 const MEDS=[
-  {id:'wys',ab:'Wy',name:'Wysolone',sub:'20 mg tablet',type:'tab',slots:['am','pm'],days:10,line:'Calms swelling in the airways',
-   generic:'Prednisolone 20 mg',why:'A steroid that calms swelling and inflammation inside the airways and lungs, so breathing gets easier while the chest infection settles.',
-   caution:'Finish the 10-day course as written. Check with the doctor before stopping it early.'},
-  {id:'pul',ab:'Pu',name:'Pulmoclear',sub:'tablet',type:'tab',slots:['am','pm'],days:15,line:'Loosens mucus, eases breathing',
-   generic:'Acebrophylline 100 mg + Acetylcysteine 600 mg',why:'Loosens thick mucus so it is easier to cough up, and helps keep the airways open.'},
-  {id:'erd',ab:'Er',name:'Erdosteine',sub:'300 mg tablet',type:'tab',slots:['am','pm'],days:15,line:'Thins sticky phlegm so it clears',
-   generic:'Erdosteine 300 mg',why:'A mucus thinner. It makes sticky phlegm runnier so the chest clears more easily with coughing.'},
-  {id:'for',ab:'Fc',name:'Foracort',sub:'neb 1 mg',type:'neb',slots:['am','pm'],days:15,line:'Reduces swelling, relaxes airways',
-   generic:'Budesonide + Formoterol (respules)',why:'Two medicines in one nebulisation. Budesonide reduces swelling in the airways, and formoterol relaxes the airway muscles so air moves more freely.'},
-  {id:'rev',ab:'Rv',name:'Revesmart',sub:'neb, once daily',type:'neb',slots:['noon'],days:15,line:'Keeps airways open all day',
-   generic:'Revefenacin 175 mcg (respule)',why:'A long-acting medicine taken once a day that keeps the airways open.',
-   caution:'This is not a rescue medicine for sudden breathlessness. For sudden breathlessness, use the emergency numbers in Help.'},
-  {id:'max',ab:'Mx',name:'Maxvryz',sub:'tablet, once daily',type:'tab',slots:['noon'],days:15,line:'Check the strip for its purpose',
-   generic:'Composition not confirmed',why:'We could not confirm what this tablet contains. Its online listing names only the maker, Curyz Lifesciences.',
-   caution:'Check the strip or ask the pharmacist what it contains and why it was prescribed.'},
-  {id:'bip',ab:'Bi',name:'BiPAP',sub:'+ O₂ 1–2 L/min',type:'air',icon:'moon',slots:['night'],days:15,line:'Start at bedtime, with oxygen',
-   generic:'BiPAP with oxygen 1–2 L/min, overnight',why:'In hospital her blood test showed carbon dioxide building up (type II respiratory failure). BiPAP supports her breathing during sleep and helps clear that carbon dioxide.'},
-  {id:'o2',ab:'O₂',name:'Oxygen',sub:'1–2 L/min overnight',type:'air',icon:'o2',slots:['dawn'],days:15,chip:' off',act:'Mark oxygen switched off',
-   line:'Runs overnight with BiPAP · switch off at 6 AM',generic:'Oxygen 1–2 litres per minute, overnight with BiPAP',
-   why:'Her oxygen level was 81% on room air when she was admitted. Oxygen through the night, given with BiPAP, keeps it in a safer range while she sleeps.',
-   caution:'Switch the oxygen machine off at 6 AM and tick it here. Through the day, check SpO₂ every 3 hours.'}
+  {id:'wy2',ab:'Wy',name:'Wysolone',sub:'10 mg tablet',type:'tab',slots:['am','pm'],line:'Lowered from 20 mg · take every day',
+   generic:'Prednisolone 10 mg',why:'A steroid that keeps the swelling in her airways down. At the 31 Oct review the dose was lowered from 20 mg to 10 mg, twice a day, to continue.',
+   caution:'She felt worse when it was stopped before. Don’t skip or stop it without asking the doctor.'},
+  {id:'ezd',ab:'Ez',name:'Erdozyd-AB',sub:'tablet',type:'tab',slots:['am','pm'],line:'For cough and mucus',
+   generic:'Check the strip for the exact contents',why:'Added at the 31 Oct review for her cough and mucus. It takes the place of Erdosteine from the discharge plan.'},
+  {id:'azf',ab:'Az',name:'Airz-FB',sub:'nebulisation',type:'neb',slots:['am','pm'],line:'Nebuliser for the airways',
+   generic:'Check the respule pack for the exact contents',why:'A nebulised medicine for the airways, added at the 31 Oct review in place of Foracort.'}
 ];
-const SPO={id:'spo',ab:'Sp',name:'SpO₂ check',sub:'every 3 hours',type:'spo',icon:'pulse',generic:'Pulse oximeter reading, 6 AM to bedtime',
-  why:'Her oxygen level was low in hospital (81% on room air). Checking with the pulse oximeter every 3 hours through the day shows early if it is dropping now that the oxygen is off.',
-  caution:'If the reading is lower than usual, or she is breathless, call the emergency numbers in Help.'};
-const CHECKS=['06','09','12','15','18','21'].map(h=>({id:'sp'+h,t:h+':00'}));
-const SLOTS=['dawn','am','noon','pm','night'];
-const SLOT_NAME={dawn:'6 AM',am:'Morning',noon:'Afternoon',pm:'Evening',night:'Bedtime'};
+const SLOT_NAME={am:'Morning',pm:'Night'};
 const UNIT={tab:'tablets',neb:'respules'};
-const dbSlot=s=>(s==='dawn'||s==='chk')?'am':s;
-const appSlot=(slot,med)=>med==='o2'?'dawn':/^sp\d\d$/.test(med)?'chk':slot;
-const timeOf=(s,id)=>s==='chk'?(CHECKS.find(c=>c.id===id)||{t:'06:00'}).t:times[s];
-const nameOf=id=>id.startsWith('sp')?'SpO₂ check':(MEDS.find(m=>m.id===id)||{name:id}).name;
 const W=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'],M=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 
+/* old discharge plan (archive, read-only) */
+const OLD_START=new Date(2026,9,18),OLD_DAYS=15;
+const OLD_MEDS=[
+  {id:'wys',name:'Wysolone 20 mg',slots:['am','pm'],days:10},{id:'pul',name:'Pulmoclear',slots:['am','pm'],days:15},
+  {id:'erd',name:'Erdosteine 300 mg',slots:['am','pm'],days:15},{id:'for',name:'Foracort neb',slots:['am','pm'],days:15},
+  {id:'rev',name:'Revesmart neb',slots:['noon'],days:15},{id:'max',name:'Maxvryz',slots:['noon'],days:15},
+  {id:'bip',name:'BiPAP + O₂',slots:['night'],days:15},{id:'o2',name:'Oxygen off at 6 AM',slots:['am'],days:15}
+];
+const OLD_SLOT={am:'Morning',noon:'2 PM',pm:'Evening',night:'Bedtime'};
+const CHANGES=[
+  ['Wysolone','20 mg → 10 mg, twice a day, no end date','Dose lowered','chg'],
+  ['Erdozyd-AB','In place of Erdosteine 300 mg','New','new'],
+  ['Airz-FB neb','In place of Foracort neb','New','new'],
+  ['Oxygen','Overnight only → all day, with breaks','Changed','chg'],
+  ['BiPAP + oxygen','Overnight, as before','Same','same'],
+  ['Pulmoclear, Revesmart, Maxvryz','Not on the 31 Oct prescription','Not listed','old']
+];
+
 const ls={get(k,d){try{const v=localStorage.getItem(k);return v==null?d:JSON.parse(v)}catch(e){return d}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
-let me=ls.get('rm-name',''), pin=ls.get('rm-pin',''), mode=ls.get('rm-mode','type');
-let times=Object.assign({am:'08:00',pm:'20:00',night:'22:00'},ls.get('rm-times',{})); times.noon='14:00'; times.dawn='06:00';
-let log=new Map(Object.entries(ls.get('rm-log',{})));
-let tab='today', filter='all', live=false, deferredInstall=null, installHidden=ls.get('rm-inst-hide',false);
-let push=ls.get('rm-push',{on:false,activity:true,reminders:true}), pushHidden=ls.get('rm-push-hide',false);
-let stock=ls.get('rm-stock',{}), spo=new Map(Object.entries(ls.get('rm-spo',{}))), srvStock=false, srvSpo=false;
+let me=ls.get('rm-name',''),pin=ls.get('rm-pin','');
+let times=Object.assign({am:'08:00',pm:'20:00',night:'22:00'},ls.get('rm-times',{}));
+let log=new Map(Object.entries(ls.get('rm2-log',{})));
+let events=ls.get('rm2-ev',[]),reads=ls.get('rm2-rd',[]);
+let oldLog=new Map(Object.entries(ls.get('rm-old-log',{}))),oldSpo=ls.get('rm-old-spo',[]);
+let alertAt=ls.get('rm-alert',null),stock=ls.get('rm-stock',{});
+let tab='today',sub=null,range=7,shown=30,live=false,deferredInstall=null,installHidden=ls.get('rm-inst-hide',false);
+let push=ls.get('rm-push',{on:false,activity:true,reminders:true}),pushHidden=ls.get('rm-push-hide',false);
+let remindMin=ls.get('rm-remind',30),busy=false;
 
 const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const mid=d=>new Date(d.getFullYear(),d.getMonth(),d.getDate());
+const pad=n=>String(n).padStart(2,'0');
+const dstr=d=>d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate());
+const pdate=s=>{const[y,m,d]=s.split('-').map(Number);return new Date(y,m-1,d)};
 const addDays=(d,n)=>new Date(d.getFullYear(),d.getMonth(),d.getDate()+n);
-const dayIdx=d=>Math.round((mid(d)-START)/864e5);
+const todayS=()=>dstr(new Date());
 const key=(d,s,m)=>d+'|'+s+'|'+m;
 const toMin=t=>{const[h,m]=t.split(':').map(Number);return h*60+m};
-function fmt(t,short){let[h,m]=t.split(':').map(Number);const ap=h>=12?'PM':'AM';h=h%12||12;return (m||!short)?h+':'+String(m).padStart(2,'0')+' '+ap:h+' '+ap}
-const clock=ts=>{const d=new Date(ts);return fmt(String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0'))};
-const dateLabel=i=>{const d=addDays(START,i);return W[d.getDay()]+' '+d.getDate()+' '+M[d.getMonth()]};
-const todayIdx=()=>dayIdx(new Date());
-let sel=Math.min(Math.max(todayIdx(),0),DAYS-1);
+function fmt(t,short){let[h,m]=t.split(':').map(Number);const ap=h>=12?'PM':'AM';h=h%12||12;return (m||!short)?h+':'+pad(m)+' '+ap:h+' '+ap}
+const clock=ts=>{const d=new Date(ts);return fmt(pad(d.getHours())+':'+pad(d.getMinutes()))};
+const dLabel=d=>W[d.getDay()]+' '+d.getDate()+' '+M[d.getMonth()];
+const whenLow=ts=>{const w=dayWhen(ts);return w==='Today'?'today':w==='Yesterday'?'yesterday':'on '+w};
+const dayWhen=ts=>{const d=new Date(ts),s=dstr(d),t=todayS();return (s===t?'Today':s===dstr(addDays(new Date(),-1))?'Yesterday':dLabel(d))};
+function dur(ms){const m=Math.max(0,Math.round(ms/6e4)),h=Math.floor(m/60);return h?h+' h '+pad(m%60)+' m':m+' min'}
+const isLow=v=>alertAt!=null&&v!=null&&v<alertAt;
+const ctxName=c=>c==='o2'?'on O₂':'room air';
+let sel=todayS();
 
-function cls(m){return 'c-'+m.type+' m-'+m.id}
-function checksFor(){return CHECKS.filter(c=>toMin(c.t)<toMin(times.night))}
+/* ---------- oxygen state ---------- */
+function evSorted(){return events.slice().sort((a,b)=>new Date(a.at)-new Date(b.at)||a.id-b.id)}
+function current(){const e=evSorted();return e.length?e[e.length-1]:null}
+function prevOf(ev){const e=evSorted(),i=e.findIndex(x=>x.id===ev.id);return i>0?e[i-1]:null}
+function readOf(ev){return reads.find(r=>r.ev===ev.id)||null}
+function lastReads(n){return reads.slice().sort((a,b)=>new Date(b.at)-new Date(a.at)).slice(0,n)}
+function segments(ds){
+  const start=pdate(ds).getTime(),end=Math.min(start+864e5,Date.now()),es=evSorted();
+  if(end<=start)return[];
+  let st=null;const segs=[];
+  es.forEach(e=>{if(new Date(e.at).getTime()<=start)st=e.kind});
+  let cur=start;
+  es.filter(e=>{const t=new Date(e.at).getTime();return t>start&&t<end}).forEach(e=>{const t=new Date(e.at).getTime();segs.push({k:st,a:cur,b:t});st=e.kind;cur=t});
+  segs.push({k:st,a:cur,b:end});
+  return segs.filter(s=>s.b>s.a);
+}
+function dayTotals(ds){let on=0,brk=0,nb=0;segments(ds).forEach(s=>{if(s.k==='on'||s.k==='bipap')on+=s.b-s.a;if(s.k==='break')brk+=s.b-s.a});
+  evSorted().forEach(e=>{if(e.kind==='break'&&dstr(new Date(e.at))===ds)nb++});return{on,brk,nb}}
+
+/* ---------- medicines ---------- */
+function doseState(d,s){
+  const t=todayS();if(d<t)return 'due';if(d>t)return 'later';
+  const n=new Date();return n.getHours()*60+n.getMinutes()>=toMin(times[s])?'due':'later';
+}
 function stockOf(m){
   const st=stock[m.id];if(!st)return null;
   let used=0;log.forEach((v,k)=>{if(k.split('|')[2]===m.id&&v&&v.at&&new Date(v.at)>new Date(st.at))used++});
@@ -312,177 +445,377 @@ function stockOf(m){
   return{left,days,low:days<=2};
 }
 function stockChip(m){
-  if(!UNIT[m.type])return'';
   const so=stockOf(m);
   if(!so)return '<button class="stockb none" data-stock="'+m.id+'">+ Stock</button>';
   return '<button class="stockb'+(so.low?' low':'')+'" data-stock="'+m.id+'" aria-label="'+esc(m.name)+': '+so.left+' '+UNIT[m.type]+' left">'+so.left+' left'+(so.low?' · buy':'')+'</button>';
 }
-function badge(m){const ic=I[m.icon||TYPES[m.type].icon];return '<div class="badge">'+ic+'<span class="ab">'+m.ab+'</span><span class="mini">'+ic+'</span></div>'}
-function slotOrder(){return SLOTS.slice().sort((a,b)=>toMin(times[a])-toMin(times[b]))}
-function medsIn(d,s){return MEDS.filter(m=>m.slots.includes(s)&&d<m.days)}
-function nowMin(){const n=new Date();return n.getHours()*60+n.getMinutes()}
-function doseState(d,s,m){
-  if(log.has(key(d,s,m.id)))return 'given';
-  const t=todayIdx();
-  if(d<t)return 'due';
-  if(d>t)return 'later';
-  return nowMin()>=toMin(times[s])?'due':'later';
-}
-function dayStats(d){let t=0,g=0;SLOTS.forEach(s=>medsIn(d,s).forEach(m=>{t++;if(log.has(key(d,s,m.id)))g++}));return{t,g}}
-function nextSlot(d){
-  for(const s of slotOrder()){const pend=medsIn(d,s).filter(m=>!log.has(key(d,s,m.id)));if(pend.length)return{s,pend,due:doseState(d,s,pend[0])==='due'}}
-  return null;
-}
+function badge(m){const ic=I[TYPES[m.type].icon];return '<div class="badge">'+ic+'<span class="ab">'+m.ab+'</span><span class="mini">'+ic+'</span></div>'}
+const cls=m=>'c-'+m.type+' m-'+m.id;
 
 /* ---------- render ---------- */
 const $=id=>document.getElementById(id);
 function render(){
-  document.documentElement.dataset.mode=mode;
+  document.documentElement.dataset.mode='med';
   renderHeader();renderTabs();
-  if(tab==='today')renderToday();else if(tab==='plan')renderPlan();else renderHelp();
+  if(tab==='today')renderToday();
+  else if(tab==='history'){if(sub==='spo')renderSpo();else if(sub==='old')renderOld();else if(sub&&sub.startsWith('oldday'))renderOldDay(+sub.slice(6));else renderHistory()}
+  else renderHelp();
 }
 function renderHeader(){
-  const t=todayIdx();
-  let h='<div class="toprow"><div><div class="eyebrow">'+(tab==='today'?'Day '+(sel+1)+' of 15':tab==='plan'?'18 Oct – 1 Nov':'Mrs. Ramani Bala')+'</div><h1>'+(tab==='today'?(sel===t?'Today, ':'')+dateLabel(sel):tab==='plan'?'15-day plan':'Help &amp; info')+'</h1></div>'+
-    '<div class="sync'+(live?' live':'')+'" role="status"><i></i>'+(live?'Live':'Offline')+'</div></div>';
+  const t=todayS();let eb,h1;
+  if(tab==='today'){eb='Ongoing · since 31 Oct review';h1=(sel===t?'Today, ':'')+dLabel(pdate(sel))}
+  else if(tab==='history'){eb='Mrs. Ramani Bala';h1=sub==='spo'?'SpO₂ &amp; pulse':sub==='old'?'Discharge plan':sub&&sub.startsWith('oldday')?dLabel(addDays(OLD_START,+sub.slice(6))):'History'}
+  else{eb='Mrs. Ramani Bala';h1='Help &amp; info'}
+  let h='<div class="toprow"><div><div class="eyebrow">'+eb+'</div><h1>'+h1+'</h1></div><div class="sync'+(live?' live':'')+'" role="status"><i></i>'+(live?'Live':'Offline')+'</div></div>';
   if(tab==='today'){
-    h+='<div class="seg" role="group" aria-label="Colours"><button data-cm="type" aria-pressed="'+(mode==='type')+'">By type</button><button data-cm="med" aria-pressed="'+(mode==='med')+'">Per medicine</button></div>';
+    const first=pdate(PLAN_START),today=pdate(t);let from=addDays(today,-6);if(from<first)from=first;
     h+='<div class="strip" id="strip">';
-    for(let i=0;i<DAYS;i++){const d=addDays(START,i),st=dayStats(i);
-      h+='<button class="day'+(i===t?' today':'')+'" data-day="'+i+'" aria-pressed="'+(i===sel)+'" aria-label="Day '+(i+1)+', '+dateLabel(i)+'"><span class="w">'+(i===t?'Today':W[d.getDay()])+'</span><span class="d num">'+d.getDate()+'</span><span class="b"><i style="width:'+(st.t?Math.round(st.g/st.t*100):0)+'%"></i></span></button>'}
+    for(let d=from;d<=today;d=addDays(d,1)){const s=dstr(d);let g=0;MEDS.forEach(m=>m.slots.forEach(sl=>{if(log.has(key(s,sl,m.id)))g++}));
+      h+='<button class="day'+(s===t?' today':'')+'" data-day="'+s+'" aria-pressed="'+(s===sel)+'" aria-label="'+dLabel(d)+'"><span class="w">'+(s===t?'Today':W[d.getDay()])+'</span><span class="d num">'+d.getDate()+'</span><span class="b"><i style="width:'+Math.round(g/6*100)+'%"></i></span></button>'}
     h+='</div>';
   }
   $('hdr').innerHTML=h;
-  $('hdr').querySelectorAll('[data-cm]').forEach(b=>b.onclick=()=>{mode=b.dataset.cm;ls.set('rm-mode',mode);render()});
-  $('hdr').querySelectorAll('[data-day]').forEach(b=>b.onclick=()=>{sel=+b.dataset.day;render()});
-  const s=$('strip');if(s){const c=s.children[sel];if(c)s.scrollLeft=c.offsetLeft-s.clientWidth/2+c.clientWidth/2}
+  $('hdr').querySelectorAll('[data-day]').forEach(b=>b.onclick=()=>{sel=b.dataset.day;render()});
+  const s=$('strip');if(s)s.scrollLeft=s.scrollWidth;
 }
 function renderTabs(){
-  const T=[['today','Today',I.today],['plan','15-day plan',I.plan],['help','Help & info',I.help]];
+  const T=[['today','Today',I.today],['history','History',I.hist],['help','Help & info',I.help]];
   $('tabs').innerHTML=T.map(([k,l,ic])=>'<button data-tab="'+k+'"'+(tab===k?' aria-current="page"':'')+'>'+ic+'<span>'+esc(l)+'</span></button>').join('');
-  $('tabs').querySelectorAll('button').forEach(b=>b.onclick=()=>{tab=b.dataset.tab;if(tab==='today')sel=Math.min(Math.max(todayIdx(),0),DAYS-1);render();window.scrollTo(0,0)});
+  $('tabs').querySelectorAll('button').forEach(b=>b.onclick=()=>{tab=b.dataset.tab;sub=null;if(tab==='today')sel=todayS();render();window.scrollTo(0,0)});
+}
+
+function readLine(r,label){
+  if(!r)return '';
+  return '<b>'+r.v+'%</b>'+(isLow(r.v)?'<span class="lowpill">Low</span>':'')+' '+(label||ctxName(r.ctx))+(r.p?' · pulse '+r.p:'')+' · '+clock(r.at);
+}
+function o2Hero(){
+  const c=current(),now=Date.now();
+  if(!c)return '<section class="o2h unk"><div class="k"><span class="l">'+I.pulse+'Oxygen</span></div><div><div class="sub">Not recorded yet. Tap what is running right now.</div></div>'+
+    '<div class="acts"><button class="a1" data-o2="on">Oxygen on</button><button class="a2" data-o2="bipap">'+I.moon+'O₂ + BiPAP</button></div></section>';
+  const lr=lastReads(2),rdBox=lr.length?'<div class="rd">'+I.pulse+'<div>Last SpO₂ '+readLine(lr[0])+(lr[1]?'<br><span class="o">Before that '+lr[1].v+'% '+ctxName(lr[1].ctx)+' · '+clock(lr[1].at)+'</span>':'')+'</div></div>':'';
+  if(c.kind==='break'){
+    const r=readOf(c),st=new Date(c.at).getTime(),ra=c.remind_at?new Date(c.remind_at).getTime():null;
+    let prog='';
+    if(ra){const p=Math.min(100,Math.round((now-st)/(ra-st)*100)),left=Math.round((ra-now)/6e4);
+      prog='<div><div class="prog"><i id="brk-p" style="width:'+p+'%"></i></div><div class="progl"><span>Reminder at '+clock(c.remind_at)+'</span><span id="brk-l">'+(left>0?left+' min left':'Reminder sent')+'</span></div></div>'}
+    return '<section class="o2h brk"><div class="k"><span class="l">'+I.pause+'Oxygen break</span><span class="r">'+(c.by?'Started by '+esc(c.by):'')+'</span></div>'+
+      '<div><div class="big" id="brk-t">'+mmss(now-st)+'</div><div class="sub">Off oxygen since '+clock(c.at)+'</div></div>'+prog+
+      (r?'<div class="rd">'+I.pulse+'<div><b>'+r.v+'%</b>'+(isLow(r.v)?'<span class="lowpill">Low</span>':'')+' SpO₂ before the break<br><span class="o">on oxygen'+(r.p?' · pulse '+r.p:'')+' · '+clock(r.at)+'</span></div></div>':'')+
+      '<div class="acts"><button class="a1 full" data-o2="end">'+I.pulse+'End break · check SpO₂</button></div></section>';
+  }
+  if(c.kind==='bipap')return '<section class="o2h bipap"><div class="k"><span class="l">'+I.moon+'Oxygen + BiPAP</span><span class="r">O₂ 1–2 L/min</span></div>'+
+    '<div><div class="big">'+dur(now-new Date(c.at))+'</div><div class="sub">BiPAP on since '+clock(c.at)+(c.by?' · started by '+esc(c.by):'')+'</div></div>'+rdBox+
+    '<div class="acts"><button class="a1 full" data-o2="bipoff">'+I.sun+'BiPAP off, oxygen stays on</button><button class="a2" data-o2="break">'+I.pause+'Take a break</button><button class="a2" data-o2="log">'+I.pulse+'Log SpO₂</button></div></section>';
+  const pv=prevOf(c);
+  return '<section class="o2h on"><div class="k"><span class="l"><span class="livedot"></span>Oxygen on</span><span class="r">1–2 L/min</span></div>'+
+    '<div><div class="big">'+dur(now-new Date(c.at))+'</div><div class="sub">Running since '+clock(c.at)+(dstr(new Date(c.at))!==todayS()?' '+whenLow(c.at):'')+(c.by?' · '+(pv&&pv.kind==='break'?'restarted':'started')+' by '+esc(c.by):'')+'</div></div>'+rdBox+
+    '<div class="acts"><button class="a1" data-o2="break">'+I.pause+'Take a break</button><button class="a2" data-o2="bipap">'+I.moon+'O₂ + BiPAP</button></div>'+
+    '<button class="lnk" data-o2="log">Log an SpO₂ reading</button></section>';
+}
+function mmss(ms){const s=Math.max(0,Math.floor(ms/1000)),m=Math.floor(s/60);return m>=60?Math.floor(m/60)+'h '+pad(m%60)+'m':m+'m '+pad(s%60)+'s'}
+
+function evText(e){
+  const pv=prevOf(e),r=readOf(e);
+  let what,detail=[];
+  if(e.kind==='break')what='Break started';
+  else if(e.kind==='bipap')what='Oxygen + BiPAP started';
+  else if(pv&&pv.kind==='break'){what='Break ended · oxygen back on';detail.push(dur(new Date(e.at)-new Date(pv.at))+' break')}
+  else if(pv&&pv.kind==='bipap')what='BiPAP off · oxygen continues';
+  else what='Oxygen on';
+  if(r)what+=' · SpO₂ '+r.v+'% '+ctxName(r.ctx);
+  if(r&&r.p)detail.push('pulse '+r.p);
+  if(e.by)detail.unshift(esc(e.by));
+  return{what,detail:detail.join(' · '),low:r&&isLow(r.v)};
+}
+const KCOL={on:'var(--m-o2)',break:'var(--warn)',bipap:'var(--m-bip)'};
+function o2DayCard(){
+  const segs=segments(sel),tot=dayTotals(sel),dayStart=pdate(sel).getTime();
+  const bar=segs.map(s=>'<span style="width:'+((s.b-s.a)/864e5*100).toFixed(2)+'%;background:'+(s.k?KCOL[s.k]:'transparent')+'"></span>').join('');
+  const rows=[];
+  evSorted().filter(e=>dstr(new Date(e.at))===sel).forEach(e=>{const t=evText(e);rows.push({at:e.at,h:'<button class="evrow" data-ev="'+e.id+'"><span class="t">'+clock(e.at)+'</span><span class="dot" style="background:'+KCOL[e.kind]+'"></span><span><b class="'+(t.low?'lowtxt':'')+'">'+t.what+'</b><small>'+t.detail+'</small></span></button>'})});
+  reads.filter(r=>!r.ev&&dstr(new Date(r.at))===sel).forEach(r=>rows.push({at:r.at,h:'<button class="evrow" data-rd="'+r.id+'"><span class="t">'+clock(r.at)+'</span><span class="dot" style="background:var(--brand)"></span><span><b class="'+(isLow(r.v)?'lowtxt':'')+'">SpO₂ '+r.v+'% '+ctxName(r.ctx)+'</b><small>'+esc(r.by||'')+(r.p?' · pulse '+r.p:'')+'</small></span></button>'}));
+  rows.sort((a,b)=>new Date(b.at)-new Date(a.at));
+  return '<section class="box"><div class="boxhd"><h2>'+(sel===todayS()?'Oxygen today':'Oxygen')+'</h2><span>'+(tot.on?dur(tot.on)+' on':'')+(tot.nb?' · '+tot.nb+' break'+(tot.nb>1?'s':''):'')+'</span></div>'+
+    '<div class="tl" role="img" aria-label="Oxygen through the day">'+bar+'</div><div class="tlax"><span>12 AM</span><span>6 AM</span><span>12 PM</span><span>6 PM</span><span>12 AM</span></div>'+
+    '<div class="legend"><span><i style="background:var(--m-bip)"></i>O₂ + BiPAP</span><span><i style="background:var(--m-o2)"></i>Oxygen</span><span><i style="background:var(--warn)"></i>Break</span></div>'+
+    (rows.length?'<div>'+rows.map(r=>r.h).join('')+'</div><p class="note" style="margin:0">Tap an entry to remove it if it was a mistake.</p>':'<p class="note" style="margin:0">Nothing logged '+(sel===todayS()?'yet today':'on this day')+'.</p>')+'</section>';
 }
 function renderToday(){
-  const t=todayIdx();let h='';
-  if(sel===t){
-    const n=nextSlot(sel);
-    if(!n)h+='<div class="next done"><span class="k">Day '+(sel+1)+' complete</span><div class="t">All given</div><div class="names">Every dose for today is ticked.</div></div>';
-    else{
-      const names=n.pend.map(m=>esc(m.name)).join(', ');
-      const late=n.due;
-      h+='<div class="next'+(late?' due':'')+'"><span class="k">'+(late?(n.s==='dawn'?'6 AM task is due':SLOT_NAME[n.s]+' dose is due'):'Next · '+(n.s==='dawn'?'6 AM':SLOT_NAME[n.s].toLowerCase()))+'</span><div class="t num">'+(late?'Due now':fmt(times[n.s]))+'</div><div class="names">'+names+'</div>'+
-        '<button class="go" data-all="'+n.s+'">'+I.check+(n.pend.length>1?'Mark all '+n.pend.length+' done':(n.pend[0].act||'Mark given'))+'</button></div>';
-    }
-  }
+  let h='';
+  if(sel===todayS())h+=o2Hero();
   h+=installBanner();
-  h+=spoCard();
-  h+='<div class="filters" role="group" aria-label="Filter">'+
-    '<button class="chipf" data-f="all" aria-pressed="'+(filter==='all')+'">All</button>'+
-    Object.entries(TYPES).map(([k,v])=>'<button class="chipf" data-f="'+k+'" aria-pressed="'+(filter===k)+'">'+I[v.icon]+v.label+'</button>').join('')+'</div>';
-  const n=sel===t?nextSlot(sel):null;
-  const list=MEDS.filter(m=>sel<m.days&&(filter==='all'||filter===m.type));
-  list.forEach(m=>{
-    const hot=n&&n.pend.includes(m);
+  h+=o2DayCard();
+  let g=0;MEDS.forEach(m=>m.slots.forEach(s=>{if(log.has(key(sel,s,m.id)))g++}));
+  h+='<div class="boxhd" style="padding:6px 2px 0"><h2 style="font-size:20px">Medicines</h2><span>31 Oct prescription · '+g+' of 6 given</span></div>';
+  MEDS.forEach(m=>{
     let doses='';
     m.slots.forEach(s=>{
-      const st=doseState(sel,s,m),r=log.get(key(sel,s,m.id));
-      const isNext=hot&&n.s===s&&!n.due;
-      const c=st==='given'?'given':isNext?'next':st==='due'?'due':'';
-      const lbl=fmt(times[s],true)+(m.chip||'');
-      const inner=st==='given'?I.check+lbl+(r&&r.by?' <span class="by">· '+esc(r.by)+'</span>':''):st==='due'?lbl+' · due':isNext?lbl+' · next':lbl;
-      doses+='<button class="dose '+c+'" data-d="'+sel+'" data-s="'+s+'" data-m="'+m.id+'" aria-label="'+esc(m.name)+' '+fmt(times[s])+(st==='given'?', given':', not given')+'">'+inner+'</button>';
+      const r=log.get(key(sel,s,m.id)),st=r?'given':doseState(sel,s);
+      const lbl=SLOT_NAME[s]+' · '+fmt(times[s],true);
+      const inner=r?I.check+SLOT_NAME[s]+' <span class="by">'+clock(r.at)+(r.by?' · '+esc(r.by):'')+'</span>':st==='due'?lbl+' · due':lbl;
+      doses+='<button class="dose '+(r?'given':st==='due'?'due':'')+'" data-s="'+s+'" data-m="'+m.id+'" aria-label="'+esc(m.name)+' '+SLOT_NAME[s]+(r?', given':', not given')+'">'+inner+'</button>';
     });
-    let course='';
-    if(m.days<DAYS){const left=m.days-1-sel;course='<span class="course'+(left<=2?' end':'')+'">'+(left===0?'Last day':'Ends '+dateLabel(m.days-1).slice(4))+'</span>'}
-    else course='<span class="course">Day '+(sel+1)+' of '+m.days+'</span>';
-    h+='<article class="card '+cls(m)+(hot?' hot':'')+'">'+badge(m)+'<div class="body"><div class="hd"><div><div class="nm">'+esc(m.name)+' <small>'+esc(m.sub)+'</small></div><div class="why">'+esc(m.line)+'</div></div>'+
-      '<button class="whyb" data-why="'+m.id+'" aria-label="Why '+esc(m.name)+'">'+I.info+'Why?</button></div><div class="doses">'+doses+course+'</div>'+(UNIT[m.type]?'<div class="doses">'+stockChip(m)+'</div>':'')+
-      (m.days<DAYS?'<div class="bar"><i style="width:'+Math.round((sel+1)/m.days*100)+'%"></i></div>':'')+'</div></article>';
+    h+='<article class="card '+cls(m)+'">'+badge(m)+'<div class="body"><div class="hd"><div><div class="nm">'+esc(m.name)+' <small>'+esc(m.sub)+'</small></div><div class="why">'+esc(m.line)+'</div></div>'+
+      '<button class="whyb" data-why="'+m.id+'" aria-label="Why '+esc(m.name)+'">'+I.info+'Why?</button></div>'+
+      (m.caution?'<div class="caution" style="padding:8px 10px;font-size:13px">'+esc(m.caution)+'</div>':'')+
+      '<div class="doses">'+doses+'</div><div class="doses">'+stockChip(m)+'</div></div></article>';
   });
-  if(sel>=10&&(filter==='all'||filter==='tab'))h+='<p class="note">Wysolone course finished on Day 10 ('+dateLabel(9)+').</p>';
   $('view').innerHTML=h;
-  bindView();
+  bindToday();
 }
-function renderPlan(){
-  const t=todayIdx();let h='<p class="note">Tap a day to see or tick its doses. Dots show 6 AM oxygen off, morning, 2 PM, evening and bedtime.</p>';
-  for(let i=0;i<DAYS;i++){
-    const st=dayStats(i),d=addDays(START,i);
-    const dots=slotOrder().map(s=>{const ms=medsIn(i,s);if(!ms.length)return'';const g=ms.filter(m=>log.has(key(i,s,m.id))).length;
-      const past=i<t||(i===t&&nowMin()>=toMin(times[s]));return '<i class="'+(g===ms.length?'g':past?'p':'n')+'" title="'+SLOT_NAME[s]+'"></i>'}).join('');
-    h+='<button class="planrow'+(i===t?' today':'')+'" data-goto="'+i+'"><span class="dt"><b class="num">'+d.getDate()+' '+M[d.getMonth()]+'</b><span>'+(i===t?'Today':W[d.getDay()])+' · Day '+(i+1)+'</span></span><span class="dots">'+dots+'</span><span class="cnt num">'+st.g+'/'+st.t+'</span></button>';
-    if(i===6)h+='<div class="box" style="flex-direction:row;align-items:center;gap:10px;background:var(--brand-soft);border-color:transparent"><b>Sat 24 Oct</b><span class="note" style="color:var(--ink2)">OPD review with Dr. Bhrungi. Book an appointment first.</span></div>';
-    if(i===9)h+='<p class="note" style="margin:0">Wysolone ends after Day 10.</p>';
+function bindToday(){
+  const v=$('view');
+  v.querySelectorAll('[data-why]').forEach(b=>b.onclick=()=>openWhy(b.dataset.why));
+  v.querySelectorAll('.dose').forEach(b=>b.onclick=()=>{const s=b.dataset.s,id=b.dataset.m;if(log.has(key(sel,s,id)))confirmUndo(sel,s,id);else setDose(sel,s,[id],true)});
+  v.querySelectorAll('[data-o2]').forEach(b=>b.onclick=()=>o2Action(b.dataset.o2));
+  v.querySelectorAll('[data-ev]').forEach(b=>b.onclick=()=>confirmEvDel(+b.dataset.ev));
+  v.querySelectorAll('[data-rd]').forEach(b=>b.onclick=()=>confirmRdDel(+b.dataset.rd));
+  bindInstall();bindStock();
+  const ix=v.querySelector('[data-inst-x]');if(ix)ix.onclick=()=>{installHidden=true;ls.set('rm-inst-hide',true);render()};
+}
+
+/* ---------- oxygen actions ---------- */
+function need(){if(!pin||!me){openSetup();return false}return true}
+function o2Action(a){
+  if(!need())return;
+  if(a==='on')return addEvent('on',null,null,null,0,'Oxygen on');
+  if(a==='bipoff')return addEvent('on',null,null,null,0,'BiPAP off · oxygen stays on');
+  if(a==='break')return openBreakStart();
+  if(a==='end')return openBreakEnd();
+  if(a==='bipap')return openBipap();
+  if(a==='log')return openLog();
+}
+function numPair(id,label,val){
+  return '<div class="pair"><label for="'+id+'-v">'+label+'<span class="numin"><input id="'+id+'-v" type="number" inputmode="numeric" min="50" max="100" placeholder="95" value="'+(val||'')+'"><span>%</span></span></label>'+
+    '<label for="'+id+'-p">Pulse, optional<span class="numin sm"><input id="'+id+'-p" type="number" inputmode="numeric" min="30" max="220" placeholder="—"><span>/min</span></span></label></div>';
+}
+function readPair(id,required){
+  const v=$(id+'-v').value.trim(),p=$(id+'-p').value.trim(),err=$(id+'-err');err.hidden=true;
+  const val=v?parseInt(v,10):null,pr=p?parseInt(p,10):null;
+  if(required&&val==null){err.textContent='Enter the SpO₂ number from the oximeter.';err.hidden=false;return null}
+  if(val!=null&&(isNaN(val)||val<50||val>100)){err.textContent='SpO₂ should be between 50 and 100.';err.hidden=false;return null}
+  if(pr!=null&&(isNaN(pr)||pr<30||pr>220)){err.textContent='Pulse should be between 30 and 220, or leave it empty.';err.hidden=false;return null}
+  return{val,pr};
+}
+function openBreakStart(){
+  const opts=[[15,'15 min'],[30,'30 min'],[45,'45 min'],[0,'No reminder']];
+  openSheet('<div><div class="eyebrow o2c">Step 1 of 2 · Before the break</div><h2 style="font-size:24px;margin-top:4px">Check SpO₂ while she’s still on oxygen</h2><p class="note" style="margin:6px 0 0;font-size:15px;color:var(--ink2)">Clip the oximeter on, wait for the number to settle, then enter it.</p></div>'+
+    numPair('bs','SpO₂ on O₂')+
+    '<div><div style="font-size:14px;font-weight:700;color:var(--ink2);margin-bottom:8px">Remind everyone to put oxygen back on after</div><div class="chips" role="group">'+
+    opts.map(([m,l])=>'<button type="button" data-rm="'+m+'" aria-pressed="'+(m===remindMin)+'">'+l+'</button>').join('')+'</div></div>'+
+    '<div class="err" id="bs-err" hidden></div>'+
+    '<button class="btn wide" id="bs-go" style="background:var(--warn);color:var(--surface)">Oxygen off · start break</button><button class="btn ghost" data-close style="height:48px;border:0">Cancel</button>',
+    close=>{
+      let rm=remindMin;
+      document.querySelectorAll('[data-rm]').forEach(b=>b.onclick=()=>{rm=+b.dataset.rm;document.querySelectorAll('[data-rm]').forEach(x=>x.setAttribute('aria-pressed',String(x===b)))});
+      $('bs-go').onclick=()=>{const r=readPair('bs',true);if(!r)return;remindMin=rm;ls.set('rm-remind',rm);close();addEvent('break',r.val,r.pr,'o2',rm,'Break started')};
+    });
+}
+function openBreakEnd(){
+  const c=current(),before=c&&c.kind==='break'?readOf(c):null,mins=c?Math.round((Date.now()-new Date(c.at))/6e4):0;
+  openSheet('<div><div class="eyebrow wc">Step 2 of 2 · After the break · '+mins+' min</div><h2 style="font-size:24px;margin-top:4px">Check SpO₂ on room air, before oxygen goes back on</h2></div>'+
+    numPair('be','SpO₂ on room air')+
+    (before?'<div class="cmp"><div><b>'+before.v+'%</b><small>Before · on O₂</small></div>'+I.arrow+'<div><b id="be-after">—</b><small>After · room air</small></div></div><div class="note" id="be-drop" style="margin-top:-8px"></div>':'')+
+    '<div class="lowbox" id="be-low" hidden></div>'+
+    '<div class="err" id="be-err" hidden></div>'+
+    '<button class="btn wide" id="be-go" style="background:var(--m-o2);color:var(--on-strong)">Save · oxygen back on</button><button class="btn ghost" data-close style="height:48px;border:0">Not yet, keep break running</button>',
+    close=>{
+      const inp=$('be-v'),upd=()=>{const v=parseInt(inp.value,10),ok=!isNaN(v)&&v>=50&&v<=100;
+        if(before){$('be-after').textContent=ok?v+'%':'—';$('be-after').className=ok&&isLow(v)?'lowtxt':'';
+          const d=ok?before.v-v:null;$('be-drop').textContent=d==null?'':d>0?'Dropped '+d+' point'+(d>1?'s':'')+' over the '+mins+'-minute break.':d===0?'Same as before the break.':'Up '+(-d)+' over the break.'}
+        const lo=ok&&isLow(v);$('be-low').hidden=!lo;if(lo)$('be-low').textContent='Below '+alertAt+'%, the level set by the family. Put oxygen back on now. If she is breathless, call the emergency number in Help.'};
+      inp.addEventListener('input',upd);
+      $('be-go').onclick=()=>{const r=readPair('be',true);if(!r)return;close();addEvent('on',r.val,r.pr,'air',0,'Oxygen back on')};
+    });
+}
+function openBipap(){
+  openSheet('<div><div class="eyebrow bc">Bedtime</div><h2 style="font-size:24px;margin-top:4px">Start oxygen + BiPAP</h2><p class="note" style="margin:6px 0 0;font-size:15px;color:var(--ink2)">An SpO₂ reading before sleep is optional.</p></div>'+
+    numPair('bp','SpO₂ on O₂')+'<div class="err" id="bp-err" hidden></div>'+
+    '<button class="btn wide" id="bp-go" style="background:var(--m-bip);color:var(--on-strong)">Start O₂ + BiPAP</button>',
+    close=>{$('bp-go').onclick=()=>{const r=readPair('bp',false);if(!r)return;close();addEvent('bipap',r.val,r.pr,'o2',0,'O₂ + BiPAP started')}});
+}
+function openLog(){
+  const c=current();let ctx=c&&c.kind==='break'?'air':'o2';
+  openSheet('<div class="sh-hd"><h2>Log SpO₂</h2><button class="x" data-close aria-label="Close">×</button></div>'+
+    '<div class="chips" role="group" aria-label="Taken"><button type="button" data-cx="o2" aria-pressed="'+(ctx==='o2')+'">On oxygen</button><button type="button" data-cx="air" aria-pressed="'+(ctx==='air')+'">Room air</button></div>'+
+    numPair('lg','SpO₂')+'<div class="err" id="lg-err" hidden></div><button class="btn wide" id="lg-go">Save reading</button>',
+    close=>{
+      document.querySelectorAll('[data-cx]').forEach(b=>b.onclick=()=>{ctx=b.dataset.cx;document.querySelectorAll('[data-cx]').forEach(x=>x.setAttribute('aria-pressed',String(x===b)))});
+      $('lg-go').onclick=async()=>{const r=readPair('lg',true);if(!r)return;close();
+        const{error}=await sb.rpc('spo2_add',{p_pin:pin,p_value:r.val,p_pulse:r.pr,p_ctx:ctx,p_by:me});
+        if(error)return rpcErr(error);await load();toast('SpO₂ '+r.val+'% saved'+(isLow(r.val)?' · below '+alertAt+'%':''))};
+    });
+}
+async function addEvent(kind,val,pr,ctx,rm,msg){
+  if(busy)return;busy=true;
+  const{error}=sb?await sb.rpc('o2_add',{p_pin:pin,p_kind:kind,p_spo2:val,p_pulse:pr,p_ctx:ctx,p_remind_min:rm||0,p_by:me}):{error:{message:'offline'}};
+  busy=false;
+  if(error)return rpcErr(error);
+  if(navigator.vibrate)try{navigator.vibrate(15)}catch(e){}
+  await load();toast(msg+(val!=null&&isLow(val)?' · SpO₂ below '+alertAt+'%':''));
+}
+function rpcErr(error){
+  if(/wrong_pin/.test(error.message)){pin='';ls.set('rm-pin','');openSetup();toast('PIN changed. Enter the new one.')}
+  else toast('Not saved: no connection. Try again.');
+}
+function confirmEvDel(id){
+  const e=events.find(x=>x.id===id);if(!e)return;const t=evText(e);
+  openSheet('<div class="sh-hd"><h2>Remove this entry?</h2><button class="x" data-close aria-label="Close">×</button></div><p style="margin:0"><b>'+t.what+'</b>, '+clock(e.at)+' '+whenLow(e.at)+(e.by?' by '+esc(e.by):'')+'. Its SpO₂ reading is removed too.</p>'+
+    '<div style="display:flex;gap:10px"><button class="btn ghost" data-close style="flex:1;height:52px;font-size:16px">Keep it</button><button class="btn" id="del" style="flex:1;background:var(--danger);color:var(--surface)">Remove</button></div>',
+    close=>{$('del').onclick=async()=>{close();if(!need())return;const{error}=await sb.rpc('o2_del',{p_pin:pin,p_id:id});if(error)return rpcErr(error);await load();toast('Removed')}});
+}
+function confirmRdDel(id){
+  const r=reads.find(x=>x.id===id);if(!r)return;
+  openSheet('<div class="sh-hd"><h2>Remove this reading?</h2><button class="x" data-close aria-label="Close">×</button></div><p style="margin:0">SpO₂ '+r.v+'% '+ctxName(r.ctx)+', '+clock(r.at)+' '+whenLow(r.at)+(r.by?' by '+esc(r.by):'')+'.</p>'+
+    (r.ev?'<p class="note" style="margin:0">This reading belongs to an oxygen entry. Removing it keeps the entry.</p>':'')+
+    '<div style="display:flex;gap:10px"><button class="btn ghost" data-close style="flex:1;height:52px;font-size:16px">Keep it</button><button class="btn" id="del" style="flex:1;background:var(--danger);color:var(--surface)">Remove</button></div>',
+    close=>{$('del').onclick=async()=>{close();if(!need())return;const{error}=await sb.rpc('spo2_del',{p_pin:pin,p_id:id});if(error)return rpcErr(error);await load();toast('Removed')}});
+}
+
+/* ---------- history ---------- */
+function oldStats(){
+  let t=0;for(let d=0;d<OLD_DAYS;d++)OLD_MEDS.forEach(m=>{if(d<m.days)t+=m.slots.length});
+  let g=0;oldLog.forEach((v,k)=>{if(!/\|sp\d\d$/.test(k))g++});
+  const vs=oldSpo.map(r=>r.v);
+  return{t,g,n:vs.length,avg:vs.length?Math.round(vs.reduce((a,b)=>a+b,0)/vs.length):null};
+}
+function renderHistory(){
+  const os=oldStats();
+  let h='<section class="box planbox"><div class="boxhd"><span class="eyebrow" style="color:var(--brand)">Current plan</span><span class="tag same">Ongoing</span></div>'+
+    '<div><h2 style="font-size:20px">Review visit · from 31 Oct</h2><div class="note" style="color:var(--ink2);font-size:14px">Dr. Sarath Chandra Bhrungi · Gleneagles Aware, L.B. Nagar</div></div>'+
+    '<div class="kvl"><div><span>Wysolone 10 mg</span><span>morning · night</span></div><div><span>Erdozyd-AB</span><span>morning · night</span></div><div><span>Airz-FB nebulisation</span><span>morning · night</span></div><div><span>Oxygen</span><span>all day, with breaks</span></div><div><span>Oxygen + BiPAP</span><span>overnight</span></div></div></section>';
+  h+='<button class="navrow" data-sub="spo"><span class="ic">'+I.pulse+'</span><span class="tx"><b>SpO₂ &amp; pulse history</b><span>Trend, breaks, every reading since 18 Oct</span></span>'+I.chev+'</button>';
+  h+='<section class="box"><h2 style="font-size:18px">What changed on 31 Oct</h2><div>'+CHANGES.map(([n,d,t,c])=>'<div class="lrow"><span><b>'+esc(n)+'</b><small>'+esc(d)+'</small></span><span class="tag '+c+'">'+esc(t)+'</span></div>').join('')+'</div>'+
+    '<p class="note" style="margin:0">Medicines marked “Not listed” are not on the 31 Oct slip. Confirm with the doctor that they are stopped.</p></section>';
+  h+='<div class="eyebrow" style="padding:6px 2px 0">Archived</div>';
+  h+='<button class="navrow" data-sub="old" style="flex-direction:column;align-items:stretch;gap:10px"><span style="display:flex;align-items:center;gap:12px"><span class="tx"><b>Discharge plan</b><span>18 Oct – 1 Nov · 15 days · read-only</span></span>'+I.chev+'</span>'+
+    '<span class="stat3"><span style="display:block"><b>'+(os.t?Math.round(os.g/os.t*100):0)+'%</b><small>doses ticked</small></span><span style="display:block"><b>'+os.n+'</b><small>SpO₂ checks</small></span><span style="display:block"><b>'+(os.avg?os.avg+'%':'—')+'</b><small>avg SpO₂</small></span></span></button>';
+  $('view').innerHTML=h;
+  $('view').querySelectorAll('[data-sub]').forEach(b=>b.onclick=()=>{sub=b.dataset.sub;shown=30;render();window.scrollTo(0,0)});
+}
+function backBtn(to,label){return '<button class="back noprint" data-back="'+(to||'')+'">'+I.back+esc(label)+'</button>'}
+function bindBack(){$('view').querySelectorAll('[data-back]').forEach(b=>b.onclick=()=>{sub=b.dataset.back||null;render();window.scrollTo(0,0)})}
+function renderOld(){
+  let h=backBtn('','History')+'<p class="note" style="margin:0">The 15-day plan from the 17 Oct discharge summary, kept as it was. Tap a day to see its ticks.</p>';
+  for(let i=0;i<OLD_DAYS;i++){
+    const d=addDays(OLD_START,i);let t=0,g=0;
+    OLD_MEDS.forEach(m=>{if(i<m.days)m.slots.forEach(s=>{t++;if(oldLog.has(key(i,s,m.id)))g++})});
+    const sp=oldSpo.filter(r=>r.day===i).length;
+    h+='<button class="planrow" data-od="'+i+'"><span class="dt"><b class="num">'+d.getDate()+' '+M[d.getMonth()]+'</b><span>'+W[d.getDay()]+' · Day '+(i+1)+'</span></span><span class="note">'+sp+' SpO₂ check'+(sp===1?'':'s')+'</span><span class="cnt num">'+g+'/'+t+'</span></button>';
   }
-  $('view').innerHTML=h;
-  $('view').querySelectorAll('[data-goto]').forEach(b=>b.onclick=()=>{sel=+b.dataset.goto;tab='today';render();window.scrollTo(0,0)});
+  $('view').innerHTML=h;bindBack();
+  $('view').querySelectorAll('[data-od]').forEach(b=>b.onclick=()=>{sub='oldday'+b.dataset.od;render();window.scrollTo(0,0)});
 }
+function renderOldDay(i){
+  let h=backBtn('old','Discharge plan')+'<section class="box"><h2 style="font-size:18px">Medicines · Day '+(i+1)+'</h2><div>';
+  OLD_MEDS.filter(m=>i<m.days).forEach(m=>m.slots.forEach(s=>{const r=oldLog.get(key(i,s,m.id));
+    h+='<div class="lrow"><span><b>'+esc(m.name)+'</b><small>'+(m.id==='o2'?'6 AM':OLD_SLOT[s])+'</small></span><span class="rt">'+(r?'<span class="tag same">✓ '+clock(r.at)+'</span><small>'+esc(r.by||'')+'</small>':'<small>Not ticked</small>')+'</span></div>'}));
+  h+='</div></section>';
+  const sp=oldSpo.filter(r=>r.day===i).sort((a,b)=>a.check<b.check?-1:1);
+  h+='<section class="box"><h2 style="font-size:18px">SpO₂ checks</h2>'+(sp.length?'<div>'+sp.map(r=>'<div class="lrow"><span><b>'+fmt(r.check.slice(2)+':00',true)+' check</b><small>'+esc(r.by||'')+' · logged '+clock(r.at)+'</small></span><span class="rt"><b class="'+(isLow(r.v)?'lowtxt':'')+'">'+r.v+'%</b><small>'+(r.p?'pulse '+r.p:'')+'</small></span></div>').join('')+'</div>':'<p class="note" style="margin:0">No readings saved for this day.</p>')+'</section>';
+  $('view').innerHTML=h;bindBack();
+}
+
+function allReads(){
+  const a=reads.map(r=>({id:r.id,at:r.at,v:r.v,p:r.p,ctx:r.ctx,by:r.by,ev:r.ev,src:'new'}));
+  oldSpo.forEach(r=>a.push({at:r.at,v:r.v,p:r.p,ctx:'air',by:r.by,src:'old',chk:r.check}));
+  return a.sort((x,y)=>new Date(y.at)-new Date(x.at));
+}
+function breakPairs(){
+  const es=evSorted(),out=[];
+  es.forEach((e,i)=>{if(e.kind!=='break')return;const nx=es[i+1];
+    out.push({at:e.at,by:e.by,before:readOf(e),after:nx&&nx.kind==='on'?readOf(nx):null,mins:nx?Math.round((new Date(nx.at)-new Date(e.at))/6e4):null,open:!nx})});
+  return out.reverse();
+}
+function chartSvg(all,days){
+  const today=pdate(todayS()),first=days?addDays(today,-(days-1)):pdate(dstr(new Date(Math.min(...all.map(r=>new Date(r.at).getTime()),today.getTime()))));
+  const n=Math.max(1,Math.round((today-first)/864e5)+1);
+  const byDay={};all.forEach(r=>{const s=dstr(new Date(r.at));(byDay[s]=byDay[s]||{o2:[],air:[]})[r.ctx].push(r.v)});
+  const avg=a=>a.length?a.reduce((x,y)=>x+y,0)/a.length:null;
+  const pts={o2:[],air:[]};let lo=100,hi=0;
+  for(let i=0;i<n;i++){const s=dstr(addDays(first,i)),b=byDay[s];if(!b)continue;['o2','air'].forEach(c=>{const v=avg(b[c]);if(v!=null){pts[c].push([i,v]);lo=Math.min(lo,v);hi=Math.max(hi,v)}})}
+  if(!pts.o2.length&&!pts.air.length)return '<p class="note" style="margin:0">No readings in this range yet.</p>';
+  lo=Math.min(lo,alertAt||lo);lo=Math.max(50,Math.floor((lo-2)/2)*2);hi=100;
+  const Wd=356,Ht=190,L=30,T=8,B=24,pw=Wd-L-8,ph=Ht-T-B;
+  const x=i=>L+(n===1?pw/2:i/(n-1)*pw),y=v=>T+(hi-v)/(hi-lo)*ph;
+  let g='';const step=(hi-lo)>20?10:(hi-lo)>10?4:2;
+  for(let v=hi;v>=lo;v-=step)g+='<line class="grid" x1="'+L+'" x2="'+Wd+'" y1="'+y(v)+'" y2="'+y(v)+'"/><text x="'+(L-6)+'" y="'+(y(v)+4)+'" text-anchor="end">'+v+'</text>';
+  if(alertAt&&alertAt>lo)g+='<line x1="'+L+'" x2="'+Wd+'" y1="'+y(alertAt)+'" y2="'+y(alertAt)+'" stroke="var(--danger)" stroke-dasharray="4 4"/>';
+  const rv=pdate(PLAN_START),ri=Math.round((rv-first)/864e5);
+  if(ri>0&&ri<n)g+='<line x1="'+x(ri)+'" x2="'+x(ri)+'" y1="'+T+'" y2="'+(T+ph)+'" stroke="var(--line2)" stroke-dasharray="3 3"/><text x="'+(x(ri)+4)+'" y="'+(T+10)+'">31 Oct</text>';
+  const lab=Math.max(1,Math.ceil(n/6));
+  for(let i=0;i<n;i+=lab){const d=addDays(first,i);g+='<text x="'+x(i)+'" y="'+(Ht-6)+'" text-anchor="middle">'+(n<=7?W[d.getDay()].slice(0,2):d.getDate()+' '+M[d.getMonth()])+'</text>'}
+  const line=(p,col,fill)=>p.length?'<polyline fill="none" stroke="'+col+'" stroke-width="2.5" stroke-linejoin="round" points="'+p.map(([i,v])=>x(i).toFixed(1)+','+y(v).toFixed(1)).join(' ')+'"/>'+p.map(([i,v])=>'<circle cx="'+x(i).toFixed(1)+'" cy="'+y(v).toFixed(1)+'" r="3.5" fill="'+(fill?col:'var(--surface)')+'" stroke="'+col+'" stroke-width="2"/>').join(''):'';
+  const desc='Daily average SpO₂. On oxygen: '+(pts.o2.length?Math.round(avg(pts.o2.map(p=>p[1])))+'%':'no readings')+'. Room air: '+(pts.air.length?Math.round(avg(pts.air.map(p=>p[1])))+'%':'no readings')+'.';
+  return '<svg class="chart" viewBox="0 0 '+Wd+' '+Ht+'" role="img" aria-label="'+desc+'">'+g+line(pts.air,'var(--warn)',false)+line(pts.o2,'var(--m-o2)',true)+'</svg>';
+}
+function renderSpo(){
+  const all=allReads(),since=range?addDays(pdate(todayS()),-(range-1)).getTime():0,inR=all.filter(r=>new Date(r.at).getTime()>=since);
+  const avg=a=>a.length?Math.round(a.reduce((x,y)=>x+y,0)/a.length):null;
+  const ao=avg(inR.filter(r=>r.ctx==='o2').map(r=>r.v)),aa=avg(inR.filter(r=>r.ctx==='air').map(r=>r.v)),ap=avg(inR.filter(r=>r.p).map(r=>r.p));
+  let h=backBtn('','History');
+  h+='<div class="seg noprint" role="group" aria-label="Range" style="align-self:flex-start;margin-top:0">'+[[7,'7 days'],[30,'30 days'],[0,'All']].map(([v,l])=>'<button data-rg="'+v+'" aria-pressed="'+(range===v)+'">'+l+'</button>').join('')+'</div>';
+  h+='<section class="box"><div class="boxhd"><h2>Daily average</h2><span>'+(range?'Last '+range+' days':'Since 18 Oct')+'</span></div>'+
+    '<div class="legend"><span><i style="background:var(--m-o2)"></i>On oxygen</span><span><i style="background:var(--warn)"></i>Room air</span>'+(alertAt?'<span><i style="background:var(--danger)"></i>Alert '+alertAt+'%</span>':'')+'</div>'+chartSvg(all,range)+
+    '<p class="note" style="margin:0">Readings from the discharge plan (18 Oct – 1 Nov) count as room air: the oxygen was off through the day then.</p></section>';
+  h+='<div class="tiles"><div class="tile"><b style="color:var(--m-o2-t)">'+(ao?ao+'%':'—')+'</b><small>avg on O₂</small></div><div class="tile"><b style="color:var(--warn)">'+(aa?aa+'%':'—')+'</b><small>avg room air</small></div><div class="tile"><b>'+(ap||'—')+'</b><small>avg pulse</small></div></div>';
+  const bp=breakPairs().filter(b=>new Date(b.at).getTime()>=since);
+  h+='<section class="box"><div class="boxhd"><h2>Breaks</h2><span>before → after</span></div>'+(bp.length?'<div>'+bp.slice(0,15).map(b=>{
+    const d=b.before&&b.after?b.after.v-b.before.v:null;
+    return '<div class="lrow"><span><b>'+dayWhen(b.at)+', '+clock(b.at)+'</b><small>'+(b.open?'Still on break':b.mins+' min')+(b.by?' · '+esc(b.by):'')+'</small></span><span class="rt"><b><span style="color:var(--m-o2-t)">'+(b.before?b.before.v:'—')+'</span> → <span class="'+(b.after&&isLow(b.after.v)?'lowtxt':'')+'" style="color:var(--warn)">'+(b.after?b.after.v:'—')+'</span></b><small>'+(d==null?'':d>0?'+'+d:d===0?'no change':'−'+(-d))+'</small></span></div>'}).join('')+'</div>':'<p class="note" style="margin:0">No oxygen breaks in this range.</p>')+'</section>';
+  h+='<section class="box"><h2 style="font-size:18px">All readings</h2>'+(inR.length?'<div>'+inR.slice(0,shown).map(r=>{
+    const tag=r.src==='old'?'<span class="tag old">Discharge plan · '+fmt(r.chk.slice(2)+':00',true)+' check</span>':'<span class="tag '+r.ctx+'">'+(r.ctx==='o2'?'On O₂':'Room air')+'</span>';
+    const inner='<span><span class="note" style="font-weight:700;color:var(--ink2)">'+dayWhen(r.at)+', '+clock(r.at)+'</span><br>'+tag+'<small>'+esc(r.by||'')+'</small></span><span class="rt"><b style="font-size:17px" class="'+(isLow(r.v)?'lowtxt':'')+'">'+r.v+'%</b><small>'+(r.p?'pulse '+r.p:'')+'</small></span>';
+    return r.src==='new'?'<button class="lrow" data-rdel="'+r.id+'">'+inner+'</button>':'<div class="lrow">'+inner+'</div>'}).join('')+'</div>'+
+    (inR.length>shown?'<button class="btn ghost noprint" id="more" style="align-self:center">Show more ('+(inR.length-shown)+')</button>':''):'<p class="note" style="margin:0">No readings in this range.</p>')+'</section>';
+  h+='<button class="btn wide noprint" id="print" style="display:flex;gap:8px;align-items:center;justify-content:center">'+I.dl.replace('<svg','<svg width="20" height="20"')+'Print or save as PDF for the doctor</button>';
+  $('view').innerHTML=h;bindBack();
+  $('view').querySelectorAll('[data-rg]').forEach(b=>b.onclick=()=>{range=+b.dataset.rg;shown=30;render()});
+  $('view').querySelectorAll('[data-rdel]').forEach(b=>b.onclick=()=>confirmRdDel(+b.dataset.rdel));
+  if($('more'))$('more').onclick=()=>{shown+=30;render()};
+  $('print').onclick=()=>{const s=shown;shown=1e4;render();setTimeout(()=>{try{window.print()}catch(e){toast('Printing is not available here')}shown=s;render()},100)};
+}
+
+/* ---------- help ---------- */
 function renderHelp(){
   let h=(isStandalone()?'':'<section class="sec"><h2>Install on this phone</h2><div class="install"><span style="color:var(--brand);display:grid">'+I.dl+'</span><div class="tx"><b>Add to home screen</b>Opens like an app, full screen, one tap away.</div><button class="btn" data-install>Install</button></div></section>');
   h+=pushSection();
-  h+='<section class="sec"><h2>Medicines at home</h2><div class="box">'+MEDS.filter(m=>UNIT[m.type]).map(m=>{const so=stockOf(m);
+  h+='<section class="sec"><h2>Medicines at home</h2><div class="box">'+MEDS.map(m=>{const so=stockOf(m);
     return '<div class="stockrow"><div><b>'+esc(m.name)+'</b><div class="q'+(so&&so.low?' low':'')+'">'+(so?so.left+' '+UNIT[m.type]+' · about '+so.days+' day'+(so.days===1?'':'s'):'Not counted yet')+'</div></div><span></span><button class="btn ghost" data-stock="'+m.id+'">'+(so?'Update':'Add')+'</button></div>'}).join('')+
-    '<p class="note" style="margin:0">Enter how many are in the house. The count goes down by one with every tick.'+(srvStock?' Shared with everyone.':' Saved on this phone until the database update is done.')+'</p></div></section>';
+    '<p class="note" style="margin:0">Enter how many are in the house. The count goes down by one with every tick. Shared with everyone.</p></div></section>';
   h+='<section class="box alert"><h2>Get urgent care if there is</h2><ul><li>Shortness of breath</li><li>Fever</li><li>Cough with sputum</li></ul>'+
     '<div class="note" style="color:var(--ink2)">Gleneagles Aware emergency, open 24/7</div>'+
     '<div class="phone"><a href="tel:+914069081111" class="num">+91 40 6908 1111</a><button class="btn ghost" data-copy="+914069081111">Copy</button></div>'+
     '<div class="phone"><a href="tel:+918297222222" class="num">82972 22222</a><button class="btn ghost" data-copy="+918297222222">Copy</button></div></section>';
-  h+='<section class="sec"><h2>Follow-up</h2><div class="box"><dl class="kv"><dt>Review</dt><dd>OPD after 1 week, around <b>Sat 24 Oct</b>. Book an appointment first.</dd><dt>Doctor</dt><dd>Dr. Sarath Chandra Bhrungi, Pulmonology</dd><dt>Diet</dt><dd>High protein: dairy, eggs, lean meat, dal, soy, nuts. Follow the diet chart from discharge.</dd></dl></div></section>';
+  h+='<section class="sec"><h2>SpO₂ alert level</h2><div class="box"><p class="note" style="margin:0">Readings below this number show in red, and the family’s phones get a “Low SpO₂” notification. Ask the doctor what number to use.</p>'+
+    '<label class="field" for="al-v">Alert when SpO₂ is below (%)<input id="al-v" type="number" inputmode="numeric" min="70" max="99" placeholder="Not set" value="'+(alertAt==null?'':alertAt)+'"></label>'+
+    '<div style="display:flex;gap:10px;flex-wrap:wrap"><button class="btn" id="b-al">Save for everyone</button>'+(alertAt==null?'':'<button class="btn ghost" id="b-al-x">Turn off</button>')+'</div></div></section>';
+  h+='<section class="sec"><h2>Follow-up</h2><div class="box"><dl class="kv"><dt>Last review</dt><dd>Sat 31 Oct 2026, OPD</dd><dt>Doctor</dt><dd>Dr. Sarath Chandra Bhrungi, Pulmonology, Gleneagles Aware, L.B. Nagar</dd><dt>Advice</dt><dd>Continue home oxygen and BiPAP. Continue the three medicines twice a day.</dd><dt>Diet</dt><dd>High protein: dairy, eggs, lean meat, dal, soy, nuts.</dd></dl></div></section>';
   h+='<section class="sec"><h2>On this phone</h2><div class="box">'+
     '<label class="field" for="f-name">Your name, shown on ticks<input id="f-name" maxlength="40" value="'+esc(me)+'" autocomplete="given-name"></label>'+
     '<button class="btn ghost" id="b-name" style="align-self:flex-start">Save name</button>'+
     '<div class="note">Family PIN is '+(pin?'set on this phone.':'not set yet.')+' <button class="btn ghost" id="b-pin" style="margin-left:6px">'+(pin?'Change':'Enter PIN')+'</button></div></div></section>';
-  h+='<section class="sec"><h2>Dose times for everyone</h2><div class="box"><p class="note" style="margin:0">The discharge summary sets <b>2:00 PM</b> for Revesmart and Maxvryz. It gives no clock times for the twice-daily medicines or BiPAP, so these are defaults. Confirm them with the doctor.</p>'+
-    '<div class="times"><label class="field" for="t-am">Morning<input type="time" id="t-am" value="'+times.am+'"></label><label class="field" for="t-pm">Evening<input type="time" id="t-pm" value="'+times.pm+'"></label><label class="field" for="t-night">Bedtime<input type="time" id="t-night" value="'+times.night+'"></label></div>'+
+  h+='<section class="sec"><h2>Dose times for everyone</h2><div class="box"><p class="note" style="margin:0">The prescription says 1-0-1: once in the morning, once at night. Pick the clock times that suit the house. Reminders follow these.</p>'+
+    '<div class="times" style="grid-template-columns:repeat(2,minmax(0,1fr))"><label class="field" for="t-am">Morning<input type="time" id="t-am" value="'+times.am+'"></label><label class="field" for="t-pm">Night<input type="time" id="t-pm" value="'+times.pm+'"></label></div>'+
     '<button class="btn" id="b-times" style="align-self:flex-start">Save for everyone</button></div></section>';
-  h+='<p class="note">From the Gleneagles Aware discharge summary, 17 Oct 2026. Follow the doctor’s advice if anything here differs.</p>';
+  h+='<p class="note">From the Gleneagles Aware OP review form, 31 Oct 2026. Follow the doctor’s advice if anything here differs.</p>';
   $('view').innerHTML=h;
   bindInstall();bindStock();bindPush();
   $('view').querySelectorAll('[data-copy]').forEach(b=>b.onclick=()=>{const v=b.dataset.copy;try{navigator.clipboard.writeText(v).then(()=>toast('Copied '+v),()=>{})}catch(e){}});
   $('b-name').onclick=()=>{const v=$('f-name').value.trim();if(!v)return toast('Enter a name');me=v;ls.set('rm-name',me);if(push.on)savePush(true);toast('Saved')};
   $('b-pin').onclick=()=>openSetup(true);
+  const saveAlert=async v=>{if(!need())return;const{error}=await sb.rpc('set_alert',{p_pin:pin,p_value:v});
+    if(error)return /bad_value/.test(error.message)?toast('Use a number between 70 and 99'):rpcErr(error);alertAt=v;ls.set('rm-alert',v);render();toast(v==null?'Alert turned off':'Alert set below '+v+'%')};
+  $('b-al').onclick=()=>{const v=parseInt($('al-v').value,10);if(isNaN(v)||v<70||v>99)return toast('Use a number between 70 and 99');saveAlert(v)};
+  if($('b-al-x'))$('b-al-x').onclick=()=>saveAlert(null);
   $('b-times').onclick=async()=>{
-    const nt={am:$('t-am').value,pm:$('t-pm').value,night:$('t-night').value};
-    if(!nt.am||!nt.pm||!nt.night)return toast('Fill in all three times');
-    if(!pin)return openSetup(true);
+    const nt={am:$('t-am').value,pm:$('t-pm').value,night:times.night||'22:00'};
+    if(!nt.am||!nt.pm)return toast('Fill in both times');
+    if(!need())return;
     const{error}=await sb.rpc('set_times',{p_pin:pin,p_times:nt});
-    if(error)return toast(/wrong_pin/.test(error.message)?'Wrong PIN. Enter it again.':'Not saved. Check the connection.');
-    Object.assign(times,nt);ls.set('rm-times',{am:times.am,pm:times.pm,night:times.night});toast('Times saved for everyone');
+    if(error)return rpcErr(error);
+    Object.assign(times,nt);ls.set('rm-times',nt);toast('Times saved for everyone');
   };
-}
-function bindView(){
-  $('view').querySelectorAll('[data-why]').forEach(b=>b.onclick=()=>openWhy(b.dataset.why));
-  $('view').querySelectorAll('[data-f]').forEach(b=>b.onclick=()=>{filter=b.dataset.f;render()});
-  $('view').querySelectorAll('.dose').forEach(b=>b.onclick=()=>{
-    const d=+b.dataset.d,s=b.dataset.s,id=b.dataset.m;
-    if(log.has(key(d,s,id)))confirmUndo(d,s,id);else if(s==='chk')openSpo(d,id);else setDose(d,s,[id],true);
-  });
-  bindInstall();bindStock();
-  const ix=$('view').querySelector('[data-inst-x]');if(ix)ix.onclick=()=>{installHidden=true;ls.set('rm-inst-hide',true);render()};
-  const all=$('view').querySelector('[data-all]');
-  if(all)all.onclick=()=>{const s=all.dataset.all;setDose(sel,s,medsIn(sel,s).filter(m=>!log.has(key(sel,s,m.id))).map(m=>m.id),true)};
-}
-
-function spoCard(){
-  const t=todayIdx(),list=checksFor(),nm=nowMin();
-  let nextId=null;
-  if(sel===t){const f=list.find(c=>toMin(c.t)>nm&&!log.has(key(sel,'chk',c.id)));nextId=f?f.id:null}
-  const missed=sel===t?list.filter(c=>toMin(c.t)<=nm&&!log.has(key(sel,'chk',c.id))):[];
-  const lastDue=missed.length?missed[missed.length-1].id:null;
-  const done=list.filter(c=>log.has(key(sel,'chk',c.id))).length;
-  let chips='';
-  list.forEach(c=>{
-    const r=log.get(key(sel,'chk',c.id)),lbl=fmt(c.t,true);
-    const past=sel<t||(sel===t&&toMin(c.t)<=nm);
-    const cl=r?'given':c.id===lastDue?'due':c.id===nextId?'next':past?'due':'';
-    const rd=spo.get(key(sel,'chk',c.id));
-    const inner=r?I.check+lbl+(rd?' · <b>'+rd.v+'%</b>':'')+(r.by?' <span class="by">· '+esc(r.by)+'</span>':''):c.id===lastDue?lbl+' · due':c.id===nextId?lbl+' · next':lbl;
-    chips+='<button class="dose '+cl+'" data-d="'+sel+'" data-s="chk" data-m="'+c.id+'" aria-label="SpO2 check '+fmt(c.t)+(r?', done':', not done')+'">'+inner+'</button>';
-  });
-  const reads=list.filter(c=>log.has(key(sel,'chk',c.id))).map(c=>spo.get(key(sel,'chk',c.id))).filter(Boolean).sort((a,b)=>new Date(b.at)-new Date(a.at));
-  const lastTxt=reads.length?'Last '+reads[0].v+'%'+(reads[0].p?', pulse '+reads[0].p:'')+' · ':'';
-  const status=lastTxt+(sel!==t?done+' of '+list.length+' checks done':lastDue?'Check is due now':nextId?'Next check at '+fmt(CHECKS.find(c=>c.id===nextId).t):done===list.length?'All checks done today':'Paused until 6 AM');
-  return '<article class="card c-spo'+(lastDue?' hot':'')+'">'+badge(SPO)+'<div class="body"><div class="hd"><div><div class="nm">SpO₂ check <small>every 3 hours</small></div><div class="why">'+status+' · pauses at bedtime</div></div>'+
-    '<button class="whyb" data-why="spo" aria-label="Why check SpO2">'+I.info+'Why?</button></div><div class="doses">'+chips+'</div></div></article>';
 }
 
 /* ---------- stock ---------- */
@@ -492,54 +825,21 @@ function openStock(id){
   openSheet('<div class="sh-hd '+cls(m)+'"><div class="l">'+badge(m)+'<div><h2>'+esc(m.name)+'</h2><div class="note">'+(so?so.left+' '+u+' left · about '+so.days+' days':'Not counted yet')+'</div></div></div><button class="x" data-close aria-label="Close">×</button></div>'+
     '<label class="field" for="st-n">How many '+u+' are in the house now?</label>'+
     '<div class="stepper"><button type="button" id="st-m" aria-label="One less">−</button><input id="st-n" type="number" inputmode="numeric" min="0" max="999" value="'+(so?so.left:'')+'" placeholder="0"><button type="button" id="st-p" aria-label="One more">+</button></div>'+
-    '<p class="note" style="margin:0">She uses '+m.slots.length+' a day. Each tick takes one off the count.'+(srvStock?' Shared with everyone.':' Saved on this phone.')+'</p>'+
+    '<p class="note" style="margin:0">She uses 2 a day. Each tick takes one off the count. Shared with everyone.</p>'+
     '<button class="btn wide" id="st-save">Save count</button>',
     close=>{
       const inp=$('st-n'),step=d=>{inp.value=Math.max(0,(+inp.value||0)+d)};
       $('st-m').onclick=()=>step(-1);$('st-p').onclick=()=>step(1);
-      $('st-save').onclick=()=>{const n=parseInt(inp.value,10);if(isNaN(n)||n<0)return toast('Enter a number');
-        close();saveStock(id,n)};
+      $('st-save').onclick=()=>{const n=parseInt(inp.value,10);if(isNaN(n)||n<0)return toast('Enter a number');close();saveStock(id,n)};
     });
+}
+async function saveStock(id,n){
+  const m=MEDS.find(x=>x.id===id);if(!need())return;
+  const{error}=await sb.rpc('set_stock',{p_pin:pin,p_med:id,p_count:n,p_by:me});
+  if(error)return rpcErr(error);
+  stock[id]={n,at:new Date().toISOString(),by:me};ls.set('rm-stock',stock);render();toast(m.name+': '+n+' '+UNIT[m.type]);
 }
 
-async function saveStock(id,n){
-  const m=MEDS.find(x=>x.id===id),u=UNIT[m.type];
-  if(srvStock){
-    if(!pin||!me)return openSetup();
-    const{error}=await sb.rpc('set_stock',{p_pin:pin,p_med:id,p_count:n,p_by:me});
-    if(error)return toast(/wrong_pin/.test(error.message)?'Wrong PIN. Enter it again.':'Not saved: no connection. Try again.');
-  }
-  stock[id]={n,at:new Date().toISOString(),by:me};ls.set('rm-stock',stock);render();toast(m.name+': '+n+' '+u);
-}
-function openSpo(d,id){
-  const c=CHECKS.find(x=>x.id===id);
-  openSheet('<div class="sh-hd c-spo"><div class="l">'+badge(SPO)+'<div><h2>SpO₂ check</h2><div class="note">'+fmt(c.t)+' · '+dateLabel(d)+'</div></div></div><button class="x" data-close aria-label="Close">×</button></div>'+
-    '<label class="field" for="sp-v">SpO₂ reading (%)</label>'+
-    '<div class="stepper"><button type="button" id="sp-m" aria-label="One less">−</button><input id="sp-v" type="number" inputmode="numeric" min="50" max="100" placeholder="95"><button type="button" id="sp-p" aria-label="One more">+</button></div>'+
-    '<label class="field" for="sp-pr">Pulse (optional)<input id="sp-pr" type="number" inputmode="numeric" min="30" max="220" placeholder="e.g. 88"></label>'+
-    (srvSpo?'':'<p class="note" style="margin:0">Readings are kept once the database update is done. For now this saves the tick.</p>')+
-    '<div class="err" id="sp-err" hidden></div><button class="btn wide" id="sp-save">Save reading</button>',
-    close=>{
-      const v=$('sp-v'),step=k=>{v.value=Math.min(100,Math.max(50,(+v.value||95)+k))};
-      $('sp-m').onclick=()=>step(-1);$('sp-p').onclick=()=>step(1);
-      $('sp-save').onclick=async()=>{
-        const val=parseInt(v.value,10),pr=$('sp-pr').value?parseInt($('sp-pr').value,10):null,err=$('sp-err');err.hidden=true;
-        if(isNaN(val)||val<50||val>100){err.textContent='Enter the SpO₂ number from the oximeter, between 50 and 100.';err.hidden=false;return}
-        if(pr!==null&&(isNaN(pr)||pr<30||pr>220)){err.textContent='Pulse should be between 30 and 220, or leave it empty.';err.hidden=false;return}
-        close();saveSpo(d,id,val,pr);
-      };
-    });
-}
-async function saveSpo(d,id,val,pr){
-  if(!pin||!me)return openSetup();
-  if(!srvSpo)return setDose(d,'chk',[id],true);
-  const k=key(d,'chk',id),prevL=log.get(k),prevS=spo.get(k),now=new Date().toISOString();
-  log.set(k,{at:now,by:me});spo.set(k,{v:val,p:pr,at:now,by:me});render();
-  const{error}=await sb.rpc('save_spo2',{p_pin:pin,p_day:d,p_check:id,p_value:val,p_pulse:pr,p_by:me});
-  if(error){prevL?log.set(k,prevL):log.delete(k);prevS?spo.set(k,prevS):spo.delete(k);render();
-    return toast(/wrong_pin/.test(error.message)?'Wrong PIN. Enter it again.':'Not saved: no connection. Try again.')}
-  saveLocal();toast('SpO₂ '+val+'% saved');
-}
 /* ---------- notifications ---------- */
 function pushSupported(){return 'serviceWorker' in navigator&&'PushManager' in window&&'Notification' in window}
 function u8(b){const p='='.repeat((4-b.length%4)%4),s=atob((b+p).replace(/-/g,'+').replace(/_/g,'/'));return Uint8Array.from(s,c=>c.charCodeAt(0))}
@@ -548,9 +848,9 @@ function pushSection(){
   if(!pushSupported())body=isIOS&&!isStandalone()
     ?'<p style="margin:0">On iPhone, notifications work after the app is installed. Install it from the button above, open it from the home screen, then turn notifications on here.</p>'
     :'<p style="margin:0">This browser can’t show notifications. Try Chrome on Android, or install the app on iPhone.</p>';
-  else if(!push.on)body='<p style="margin:0">Get a notification when anyone ticks a dose, logs SpO₂ or updates stock, plus a reminder 10 minutes before each dose and check, and another 30 minutes after if it isn’t ticked.</p><button class="btn" data-push-on style="align-self:flex-start">Turn on notifications</button>';
-  else body='<label class="tog" for="pn-a"><span>Updates from family<small>Ticks, SpO₂ readings, stock and time changes</small></span><input type="checkbox" id="pn-a"'+(push.activity?' checked':'')+'></label>'+
-    '<label class="tog" for="pn-r"><span>Reminders<small>10 min before, and 30 min after if not ticked</small></span><input type="checkbox" id="pn-r"'+(push.reminders?' checked':'')+'></label>'+
+  else if(!push.on)body='<p style="margin:0">Get a notification when anyone ticks a dose, starts or ends an oxygen break, or logs SpO₂. Also a reminder when a break is up, and before and after each dose.</p><button class="btn" data-push-on style="align-self:flex-start">Turn on notifications</button>';
+  else body='<label class="tog" for="pn-a"><span>Updates from family<small>Ticks, oxygen breaks, SpO₂ readings, stock</small></span><input type="checkbox" id="pn-a"'+(push.activity?' checked':'')+'></label>'+
+    '<label class="tog" for="pn-r"><span>Reminders<small>Break time up, and 10 min before / 30 min after each dose</small></span><input type="checkbox" id="pn-r"'+(push.reminders?' checked':'')+'></label>'+
     '<div style="display:flex;gap:10px;flex-wrap:wrap"><button class="btn ghost" id="pn-test">Send a test</button><button class="btn ghost" id="pn-off">Turn off on this phone</button></div>';
   return '<section class="sec"><h2>Notifications on this phone</h2><div class="box">'+body+'</div></section>';
 }
@@ -558,10 +858,10 @@ function bindPush(){
   const a=$('pn-a'),r=$('pn-r');
   if(a)a.onchange=()=>{push.activity=a.checked;ls.set('rm-push',push);savePush(true)};
   if(r)r.onchange=()=>{push.reminders=r.checked;ls.set('rm-push',push);savePush(true)};
-  if($('pn-test'))$('pn-test').onclick=async()=>{const sub=await currentSub();if(!sub)return toast('Turn notifications on again');
-    const{error}=await sb.rpc('test_push',{p_pin:pin,p_endpoint:sub.endpoint});toast(error?'Could not send. Check the connection.':'Test sent. It should arrive in a few seconds.')};
-  if($('pn-off'))$('pn-off').onclick=async()=>{const sub=await currentSub();
-    if(sub){const j=sub.toJSON();try{await sb.rpc('save_push',{p_pin:pin,p_endpoint:j.endpoint,p_p256dh:j.keys.p256dh,p_auth:j.keys.auth,p_name:me,p_activity:false,p_reminders:false})}catch(e){}}
+  if($('pn-test'))$('pn-test').onclick=async()=>{const s=await currentSub();if(!s)return toast('Turn notifications on again');
+    const{error}=await sb.rpc('test_push',{p_pin:pin,p_endpoint:s.endpoint});toast(error?'Could not send. Check the connection.':'Test sent. It should arrive in a few seconds.')};
+  if($('pn-off'))$('pn-off').onclick=async()=>{const s=await currentSub();
+    if(s){const j=s.toJSON();try{await sb.rpc('save_push',{p_pin:pin,p_endpoint:j.endpoint,p_p256dh:j.keys.p256dh,p_auth:j.keys.auth,p_name:me,p_activity:false,p_reminders:false})}catch(e){}}
     push.on=false;ls.set('rm-push',push);render();toast('Notifications off on this phone')};
 }
 async function currentSub(){try{const reg=await navigator.serviceWorker.ready;return await reg.pushManager.getSubscription()}catch(e){return null}}
@@ -570,7 +870,7 @@ async function enablePush(){
     if(isIOS&&!isStandalone())return openSheet('<div class="sh-hd"><h2>Install first</h2><button class="x" data-close aria-label="Close">×</button></div><p style="margin:0">On iPhone, notifications work only from the installed app.</p><button class="btn wide" id="go-inst">Show me how</button>',close=>{$('go-inst').onclick=()=>{close();doInstall()}});
     return toast('This browser can’t show notifications');
   }
-  if(!pin||!me)return openSetup();
+  if(!need())return;
   let perm;try{perm=await Notification.requestPermission()}catch(e){perm='denied'}
   if(perm!=='granted')return openSheet('<div class="sh-hd"><h2>Notifications are blocked</h2><button class="x" data-close aria-label="Close">×</button></div><p style="margin:0">Allow notifications for this app in the phone’s Settings, then tap Turn on again.</p>');
   push.activity=push.activity!==false;push.reminders=push.reminders!==false;if(!push.activity&&!push.reminders){push.activity=true;push.reminders=true}
@@ -580,9 +880,9 @@ async function enablePush(){
 async function savePush(quiet){
   try{
     const reg=await navigator.serviceWorker.ready;
-    let sub=await reg.pushManager.getSubscription();
-    if(!sub)sub=await reg.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:u8(VAPID)});
-    const j=sub.toJSON();
+    let s=await reg.pushManager.getSubscription();
+    if(!s)s=await reg.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:u8(VAPID)});
+    const j=s.toJSON();
     const{error}=await sb.rpc('save_push',{p_pin:pin,p_endpoint:j.endpoint,p_p256dh:j.keys.p256dh,p_auth:j.keys.auth,p_name:me,p_activity:!!push.activity,p_reminders:!!push.reminders});
     if(error){if(!quiet)toast(/wrong_pin/.test(error.message)?'Wrong PIN. Enter it again.':'Could not turn on. Check the connection.');return false}
     return true;
@@ -594,7 +894,7 @@ function isStandalone(){try{return matchMedia('(display-mode: standalone)').matc
 const isIOS=/iphone|ipad|ipod/i.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
 function installBanner(){
   if(!push.on&&!pushHidden&&pushSupported()&&(isStandalone()||!isIOS))
-    return '<div class="install"><span style="color:var(--brand);display:grid">'+I.bell+'</span><div class="tx"><b>Turn on notifications</b>Get family updates and a reminder before and after each dose.</div><button class="btn" data-push-on style="padding:10px 14px">Turn on</button><button class="x" data-push-x aria-label="Hide">×</button></div>';
+    return '<div class="install"><span style="color:var(--brand);display:grid">'+I.bell+'</span><div class="tx"><b>Turn on notifications</b>Get oxygen break reminders and family updates.</div><button class="btn" data-push-on style="padding:10px 14px">Turn on</button><button class="x" data-push-x aria-label="Hide">×</button></div>';
   if(isStandalone()||installHidden)return'';
   return '<div class="install"><span style="color:var(--brand);display:grid">'+I.dl+'</span><div class="tx"><b>Install the app</b>Add it to the home screen for one-tap access.</div><button class="btn" data-install style="padding:10px 14px">Install</button><button class="x" data-inst-x aria-label="Hide">×</button></div>';
 }
@@ -610,7 +910,7 @@ async function doInstall(){
   const steps=isIOS
     ?'<ol class="steps"><li>Open this page in <b>Safari</b>.</li><li>Tap the <b>Share</b> button, the square with an arrow pointing up.</li><li>Scroll down and tap <b>Add to Home Screen</b>.</li><li>Tap <b>Add</b>. The app appears on the home screen.</li></ol>'
     :'<ol class="steps"><li>Open this page in <b>Chrome</b>.</li><li>Tap the <b>⋮</b> menu at the top right.</li><li>Tap <b>Install app</b> or <b>Add to Home screen</b>.</li><li>Tap <b>Install</b>.</li></ol>';
-  openSheet('<div class="sh-hd"><h2>Install the app</h2><button class="x" data-close aria-label="Close">×</button></div>'+steps+'<p class="note" style="margin:0">After that, open it from the home screen. Ticks stay synced with everyone.</p>');
+  openSheet('<div class="sh-hd"><h2>Install the app</h2><button class="x" data-close aria-label="Close">×</button></div>'+steps+'<p class="note" style="margin:0">After that, open it from the home screen. Everything stays synced with everyone.</p>');
 }
 window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();deferredInstall=e});
 window.addEventListener('appinstalled',()=>{deferredInstall=null;toast('Installed');render()});
@@ -625,26 +925,24 @@ function openSheet(html,onBind){
   const f=l.querySelector('input,button.btn');if(f)setTimeout(()=>f.focus(),50);
 }
 function openWhy(id){
-  const m=id==='spo'?SPO:MEDS.find(x=>x.id===id);
-  const when=m.slots?m.slots.map(s=>fmt(times[s])).join(' and '):checksFor().map(c=>fmt(c.t,true)).join(', ');
-  const course=m.days?(m.days<DAYS?m.days+' days · last dose '+dateLabel(m.days-1):'15 days · until '+dateLabel(DAYS-1)):'Until the review visit';
-  let given='';if(m.slots){let g=0,t=0;for(let d=0;d<m.days;d++)m.slots.forEach(s=>{t++;if(log.has(key(d,s,m.id)))g++});given='<dt>Given</dt><dd>'+g+' of '+t+' doses</dd>'}
-  openSheet('<div class="sh-hd '+cls(m)+'"><div class="l">'+badge(m)+'<div><h2>'+esc(m.name)+'</h2><div class="note">'+esc(m.generic)+'</div></div></div><button class="x" data-close aria-label="Close">×</button></div>'+
-    '<div class="whybox '+cls(m)+'"><span class="eyebrow">'+(m.type==='spo'?'Why we check':m.id==='o2'?'Why she uses it':'Why she takes it')+'</span><p>'+esc(m.why)+'</p></div>'+
-    '<dl class="kv"><dt>When</dt><dd><b>'+when+'</b></dd>'+(m.type==='spo'?'':'<dt>Course</dt><dd>'+course+'</dd>'+given)+(UNIT[m.type]&&stockOf(m)?'<dt>At home</dt><dd>'+stockOf(m).left+' '+UNIT[m.type]+'</dd>':'')+'</dl>'+
+  const m=MEDS.find(x=>x.id===id);
+  let g=0;log.forEach((v,k)=>{if(k.split('|')[2]===id)g++});
+  openSheet('<div class="sh-hd '+cls(m)+'"><div class="l">'+badge(m)+'<div><h2>'+esc(m.name)+' <small style="font-size:16px;font-weight:400">'+esc(m.sub)+'</small></h2><div class="note">'+esc(m.generic)+'</div></div></div><button class="x" data-close aria-label="Close">×</button></div>'+
+    '<div class="whybox '+cls(m)+'"><span class="eyebrow">Why she takes it</span><p>'+esc(m.why)+'</p></div>'+
+    '<dl class="kv"><dt>When</dt><dd><b>'+fmt(times.am)+' and '+fmt(times.pm)+'</b> (1-0-1)</dd><dt>Course</dt><dd>Continue, from 31 Oct</dd><dt>Ticked</dt><dd>'+g+' doses so far</dd>'+(stockOf(m)?'<dt>At home</dt><dd>'+stockOf(m).left+' '+UNIT[m.type]+'</dd>':'')+'</dl>'+
     (m.caution?'<div class="caution">'+esc(m.caution)+'</div>':'')+
-    '<p class="note" style="margin:0">Plain-language summary for family. Dose and timing come from the discharge summary.</p>');
+    '<p class="note" style="margin:0">Plain-language summary for family. Dose and timing come from the 31 Oct prescription.</p>');
 }
 function confirmUndo(d,s,id){
-  const r=log.get(key(d,s,id));
+  const r=log.get(key(d,s,id)),m=MEDS.find(x=>x.id===id);
   openSheet('<div class="sh-hd"><h2>Undo this tick?</h2><button class="x" data-close aria-label="Close">×</button></div>'+
-    '<p style="margin:0">'+esc(nameOf(id))+', '+fmt(timeOf(s,id))+' on '+dateLabel(d)+' was marked done'+(r&&r.at?' at '+clock(r.at):'')+(r&&r.by?' by '+esc(r.by):'')+'.</p>'+
+    '<p style="margin:0">'+esc(m.name)+', '+SLOT_NAME[s].toLowerCase()+' on '+dLabel(pdate(d))+' was marked given'+(r&&r.at?' at '+clock(r.at):'')+(r&&r.by?' by '+esc(r.by):'')+'.</p>'+
     '<div style="display:flex;gap:10px"><button class="btn ghost" data-close style="flex:1;height:52px;font-size:16px">Keep it</button><button class="btn" id="undo" style="flex:1;background:var(--danger);color:var(--surface)">Remove tick</button></div>',
-    close=>{$('undo').onclick=()=>{close();if(s==='chk')spo.delete(key(d,s,id));setDose(d,s,[id],false)}});
+    close=>{$('undo').onclick=()=>{close();setDose(d,s,[id],false)}});
 }
 function openSetup(force){
   openSheet('<div class="sh-hd"><h2>'+(me&&pin?'Change PIN':'Welcome')+'</h2>'+(force?'<button class="x" data-close aria-label="Close">×</button>':'')+'</div>'+
-    '<p style="margin:0">Everyone at home shares this schedule. Ticks show up on every phone within a few seconds.</p>'+
+    '<p style="margin:0">Everyone at home shares this schedule. Ticks and oxygen updates show up on every phone within a few seconds.</p>'+
     '<label class="field" for="s-name">Your name<input id="s-name" maxlength="40" value="'+esc(me)+'" autocomplete="given-name" placeholder="e.g. Balendu"></label>'+
     '<label class="field" for="s-pin">Family PIN<input id="s-pin" inputmode="numeric" pattern="[0-9]*" maxlength="8" autocomplete="off" placeholder="4 digits"></label>'+
     '<div class="err" id="s-err" hidden></div><button class="btn wide" id="s-go">Continue</button>',
@@ -663,38 +961,41 @@ function openSetup(force){
       $('s-go').onclick=go;$('s-pin').addEventListener('keydown',e=>{if(e.key==='Enter')go()});
     });
 }
-let tt;function toast(msg){const t=$('toast');t.textContent=msg;t.hidden=false;clearTimeout(tt);tt=setTimeout(()=>t.hidden=true,2400)}
+let tt;function toast(msg){const t=$('toast');t.textContent=msg;t.hidden=false;clearTimeout(tt);tt=setTimeout(()=>t.hidden=true,2600)}
 
 /* ---------- data ---------- */
 const sb=window.supabase?window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY,{auth:{persistSession:false}}):null;
-function saveLocal(){ls.set('rm-log',Object.fromEntries(log));ls.set('rm-spo',Object.fromEntries(spo))}
+function saveLocal(){ls.set('rm2-log',Object.fromEntries(log));ls.set('rm2-ev',events);ls.set('rm2-rd',reads)}
 async function setDose(d,s,ids,given){
-  if(!ids.length)return;
-  if(!pin||!me)return openSetup();
+  if(!ids.length||!need())return;
   const prev=ids.map(id=>[id,log.get(key(d,s,id))]);
   ids.forEach(id=>given?log.set(key(d,s,id),{at:new Date().toISOString(),by:me}):log.delete(key(d,s,id)));
   render();
   if(navigator.vibrate)try{navigator.vibrate(15)}catch(e){}
-  const{error}=sb?await sb.rpc('set_dose',{p_pin:pin,p_day:d,p_slot:dbSlot(s),p_meds:ids,p_given:given,p_by:me}):{error:{message:'offline'}};
-  if(error){
-    prev.forEach(([id,v])=>v?log.set(key(d,s,id),v):log.delete(key(d,s,id)));render();
-    if(/wrong_pin/.test(error.message)){pin='';ls.set('rm-pin','');openSetup();toast('PIN changed. Enter the new one.')}
-    else toast('Not saved: no connection. Try again.');
-    return;
-  }
-  saveLocal();
-  toast(given?(ids.length>1?ids.length+' ticked':'Ticked'):'Tick removed');
+  const{error}=sb?await sb.rpc('set_dose2',{p_pin:pin,p_date:d,p_slot:s,p_meds:ids,p_given:given,p_by:me}):{error:{message:'offline'}};
+  if(error){prev.forEach(([id,v])=>v?log.set(key(d,s,id),v):log.delete(key(d,s,id)));render();return rpcErr(error)}
+  saveLocal();toast(given?'Ticked':'Tick removed');
 }
+let oldLoaded=oldSpo.length>0;
 async function load(){
   if(!sb)return;
-  const[a,b,c,e]=await Promise.all([sb.from('dose_log').select('day,slot,med_id,given_at,given_by'),sb.from('settings').select('key,value'),
-    sb.from('spo2_reading').select('day,check_id,value,pulse,taken_at,taken_by'),sb.from('med_stock').select('med_id,count,set_at,set_by')]);
-  srvSpo=!c.error;srvStock=!e.error;
-  if(srvSpo)spo=new Map(c.data.map(r=>[key(r.day,'chk',r.check_id),{v:r.value,p:r.pulse,at:r.taken_at,by:r.taken_by}]));
-  if(srvStock){stock={};e.data.forEach(r=>{stock[r.med_id]={n:r.count,at:r.set_at,by:r.set_by}});ls.set('rm-stock',stock)}
-  if(a.error||b.error){live=false;renderHeader();return}
-  log=new Map(a.data.map(r=>[key(r.day,appSlot(r.slot,r.med_id),r.med_id),{at:r.given_at,by:r.given_by}]));saveLocal();
-  const t=(b.data.find(x=>x.key==='times')||{}).value;if(t){times=Object.assign(times,t);times.noon='14:00';times.dawn='06:00';ls.set('rm-times',t)}
+  const q=[sb.from('med_log2').select('date,slot,med_id,given_at,given_by'),sb.from('settings').select('key,value'),
+    sb.from('o2_event').select('id,at,kind,remind_at,by').order('at'),sb.from('spo2_log').select('id,at,value,pulse,ctx,event_id,by').order('at'),
+    sb.from('med_stock').select('med_id,count,set_at,set_by')];
+  if(!oldLoaded)q.push(sb.from('dose_log').select('day,slot,med_id,given_at,given_by'),sb.from('spo2_reading').select('day,check_id,value,pulse,taken_at,taken_by'));
+  const[a,b,c,d,e,f,g]=await Promise.all(q);
+  if(a.error||b.error||c.error||d.error){live=false;renderHeader();return}
+  log=new Map(a.data.map(r=>[key(r.date,r.slot,r.med_id),{at:r.given_at,by:r.given_by}]));
+  events=c.data;reads=d.data.map(r=>({id:r.id,at:r.at,v:r.value,p:r.pulse,ctx:r.ctx,ev:r.event_id,by:r.by}));
+  const t=(b.data.find(x=>x.key==='times')||{}).value;if(t){times=Object.assign(times,t);ls.set('rm-times',t)}
+  const al=b.data.find(x=>x.key==='spo2_alert');alertAt=al&&al.value!=null?+al.value:null;ls.set('rm-alert',alertAt);
+  if(!e.error){stock={};e.data.forEach(r=>{stock[r.med_id]={n:r.count,at:r.set_at,by:r.set_by}});ls.set('rm-stock',stock)}
+  if(f&&!f.error&&g&&!g.error){
+    oldLog=new Map(f.data.map(r=>[key(r.day,r.med_id==='o2'?'am':r.slot,r.med_id),{at:r.given_at,by:r.given_by}]));
+    oldSpo=g.data.map(r=>({day:r.day,check:r.check_id,v:r.value,p:r.pulse,at:r.taken_at,by:r.taken_by}));
+    oldLoaded=true;ls.set('rm-old-log',Object.fromEntries(oldLog));ls.set('rm-old-spo',oldSpo);
+  }
+  saveLocal();
   if(tab!=='help')render();else renderHeader();
 }
 let ch;
@@ -702,16 +1003,25 @@ function subscribe(){
   if(!sb)return;
   if(ch)sb.removeChannel(ch);
   let timer;const soon=()=>{clearTimeout(timer);timer=setTimeout(load,250)};
-  ch=sb.channel('ramani-meds').on('postgres_changes',{event:'*',schema:'public',table:'dose_log'},soon).on('postgres_changes',{event:'*',schema:'public',table:'settings'},soon)
-    .on('postgres_changes',{event:'*',schema:'public',table:'spo2_reading'},soon).on('postgres_changes',{event:'*',schema:'public',table:'med_stock'},soon)
-    .subscribe(st=>{live=st==='SUBSCRIBED';renderHeader();if(live)load()});
+  ch=sb.channel('ramani-meds-2');
+  ['med_log2','settings','o2_event','spo2_log','med_stock'].forEach(t=>ch.on('postgres_changes',{event:'*',schema:'public',table:t},soon));
+  ch.subscribe(st=>{live=st==='SUBSCRIBED';renderHeader();if(live)load()});
+}
+function tick(){
+  if(tab!=='today'||sel!==todayS())return;
+  const c=current();if(!c||c.kind!=='break')return;
+  const now=Date.now(),st=new Date(c.at).getTime(),el=$('brk-t');if(el)el.textContent=mmss(now-st);
+  if(c.remind_at){const ra=new Date(c.remind_at).getTime(),p=$('brk-p'),l=$('brk-l');
+    if(p)p.style.width=Math.min(100,Math.round((now-st)/(ra-st)*100))+'%';
+    if(l){const left=Math.round((ra-now)/6e4);l.textContent=left>0?left+' min left':'Reminder sent'}}
 }
 
 render();
-if(!sb){toast('Offline. Showing the last saved ticks.')}
+if(!sb){toast('Offline. Showing the last saved data.')}
 else{load();subscribe()}
 if(!me||!pin)setTimeout(()=>openSetup(false),300);
 if(push.on&&pushSupported()&&me&&pin)setTimeout(()=>savePush(true),1500);
+setInterval(tick,1000);
 setInterval(()=>{if(tab!=='help'&&!document.querySelector('#layer .scrim'))render()},60000);
 document.addEventListener('visibilitychange',()=>{if(!document.hidden){load();if(!live)subscribe()}});
 window.addEventListener('online',()=>{load();subscribe()});

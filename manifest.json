@@ -1,7 +1,7 @@
 {
   "name": "Ramani's Medicines",
   "short_name": "Ramani Meds",
-  "description": "Shared 15-day discharge medicine schedule for the family",
+  "description": "Shared medicine, oxygen and SpO₂ tracker for the family",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",

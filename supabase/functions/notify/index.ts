@@ -7,19 +7,14 @@ const sb = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SE
   auth: { persistSession: false },
 });
 
-const START_UTC = Date.UTC(2026, 9, 18); // Day 1 = Sun 18 Oct 2026 (IST date)
-const DAYS = 15;
-const MEDS: Record<string, { n: string; slots: string[]; days: number; unit?: string }> = {
-  o2: { n: "Oxygen off", slots: ["dawn"], days: 15 },
-  wys: { n: "Wysolone", slots: ["am", "pm"], days: 10, unit: "tablets" },
-  pul: { n: "Pulmoclear", slots: ["am", "pm"], days: 15, unit: "tablets" },
-  erd: { n: "Erdosteine", slots: ["am", "pm"], days: 15, unit: "tablets" },
-  for: { n: "Foracort neb", slots: ["am", "pm"], days: 15, unit: "respules" },
-  rev: { n: "Revesmart neb", slots: ["noon"], days: 15, unit: "respules" },
-  max: { n: "Maxvryz", slots: ["noon"], days: 15, unit: "tablets" },
-  bip: { n: "BiPAP", slots: ["night"], days: 15 },
+// Ongoing plan from the 31 Oct 2026 review. The old 15-day plan (dose_log) is archived: no reminders for it.
+const MEDS: Record<string, { n: string; unit?: string }> = {
+  wy2: { n: "Wysolone 10 mg", unit: "tablets" },
+  ezd: { n: "Erdozyd-AB", unit: "tablets" },
+  azf: { n: "Airz-FB neb", unit: "respules" },
 };
-const CHECK_HOURS = ["06", "09", "12", "15", "18", "21"];
+const SLOTS = ["am", "pm"];
+const SLOT_NAME: Record<string, string> = { am: "Morning", pm: "Night" };
 const W = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 const M = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 
@@ -31,21 +26,19 @@ function fmt(t: string) {
 }
 function istNow() {
   const d = new Date(Date.now() + 5.5 * 3600e3);
-  const day = Math.floor((Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate()) - START_UTC) / 864e5);
-  return { day, min: d.getUTCHours() * 60 + d.getUTCMinutes() };
+  const date = d.toISOString().slice(0, 10);
+  return { date, min: d.getUTCHours() * 60 + d.getUTCMinutes() };
 }
-function dateLabel(i: number) {
-  const d = new Date(START_UTC + i * 864e5);
+function dateLabel(s: string) {
+  const d = new Date(s + "T00:00:00Z");
   return `${W[d.getUTCDay()]} ${d.getUTCDate()} ${M[d.getUTCMonth()]}`;
 }
 async function getTimes() {
   const { data } = await sb.from("settings").select("value").eq("key", "times").maybeSingle();
-  const t = Object.assign({ am: "08:00", pm: "20:00", night: "22:00" }, data?.value || {});
-  return { ...t, noon: "14:00", dawn: "06:00" } as Record<string, string>;
+  return Object.assign({ am: "08:00", pm: "20:00" }, data?.value || {}) as Record<string, string>;
 }
-const nameOf = (id: string) => (id.startsWith("sp") ? "SpO₂ check" : MEDS[id]?.n || id);
-const timeOfRow = (slot: string, med: string, times: Record<string, string>) =>
-  med === "o2" ? "06:00" : med.startsWith("sp") ? `${med.slice(2)}:00` : times[slot] || "08:00";
+const nameOf = (id: string) => MEDS[id]?.n || id;
+const ctxName = (c: string) => (c === "o2" ? "on O₂" : "room air");
 
 type Msg = { title: string; body: string; tag?: string };
 
@@ -76,29 +69,49 @@ async function send(msg: Msg, opts: { reminders?: boolean; exclude?: string | nu
 }
 
 async function handleEvent(p: any) {
-  const times = await getTimes();
-  const today = istNow().day;
-  const dayNote = (d: number) => (d === today ? "" : ` (${dateLabel(d)})`);
+  const today = istNow().date;
   const rows: any[] = p.rows || [];
   if (!rows.length) return { skipped: true };
 
-  if (p.kind === "dose") {
+  if (p.kind === "dose2") {
     const r0 = rows[0];
-    const t = fmt(timeOfRow(r0.slot, r0.med, times));
+    const when = `${SLOT_NAME[r0.slot] || r0.slot}${r0.date === today ? "" : ` (${dateLabel(r0.date)})`}`;
     const names = rows.map((r) => nameOf(r.med)).join(", ");
-    if (p.op === "insert") {
-      if (rows.length === 1 && r0.med === "o2")
-        return send({ title: "Oxygen switched off", body: `By ${r0.by || "someone"}${dayNote(r0.day)}` }, { exclude: r0.by });
-      return send({ title: `Given · ${t}${dayNote(r0.day)}`, body: `${names} · by ${r0.by || "someone"}` }, { exclude: r0.by });
-    }
-    return send({ title: "Tick removed", body: `${names} · ${t}${dayNote(r0.day)}` }, {});
+    if (p.op === "insert") return send({ title: `Given · ${when}`, body: `${names} · by ${r0.by || "someone"}` }, { exclude: r0.by });
+    return send({ title: "Tick removed", body: `${names} · ${when}` }, {});
   }
-  if (p.kind === "spo2") {
+  if (p.kind === "o2") {
     const r = rows[0];
+    const low = r.v != null && r.alert != null && r.v < r.alert;
+    const sp = r.v != null ? `SpO₂ ${r.v}% ${ctxName(r.ctx)}${r.p ? `, pulse ${r.p}` : ""}` : "";
+    const by = `by ${r.by || "someone"}`;
+    let title: string, body: string;
+    if (r.k === "break") {
+      title = low ? `Low SpO₂ ${r.v}% · break started` : "Oxygen break started";
+      body = [sp, r.remind ? `reminder in ${r.remind} min` : "", by].filter(Boolean).join(" · ");
+    } else if (r.k === "bipap") {
+      title = "Oxygen + BiPAP started";
+      body = [sp, by].filter(Boolean).join(" · ");
+    } else if (r.prev === "break") {
+      title = low ? `Low SpO₂ ${r.v}% after the break` : "Break over · oxygen back on";
+      body = [sp, r.mins != null ? `${r.mins} min off oxygen` : "", by].filter(Boolean).join(" · ");
+    } else if (r.prev === "bipap") {
+      title = "BiPAP off · oxygen continues";
+      body = by;
+    } else {
+      title = "Oxygen on";
+      body = [sp, by].filter(Boolean).join(" · ");
+    }
+    // A low reading goes to everyone, including the person who logged it.
+    return send({ title, body, tag: low ? "low-spo2" : undefined }, { exclude: low ? null : r.by });
+  }
+  if (p.kind === "spo2b") {
+    const r = rows[0];
+    const low = r.alert != null && r.v < r.alert;
     return send({
-      title: `SpO₂ ${r.v}%${r.p ? ` · pulse ${r.p}` : ""}`,
-      body: `${fmt(r.check.slice(2) + ":00")} check · by ${r.by || "someone"}${dayNote(r.day)}`,
-    }, { exclude: r.by });
+      title: `${low ? "Low SpO₂" : "SpO₂"} ${r.v}% ${ctxName(r.ctx)}`,
+      body: `${r.p ? `Pulse ${r.p} · ` : ""}by ${r.by || "someone"}`,
+    }, { exclude: low ? null : r.by });
   }
   if (p.kind === "stock") {
     const r = rows[0];
@@ -106,47 +119,56 @@ async function handleEvent(p: any) {
   }
   if (p.kind === "times") {
     const v = rows[0].value || {};
-    return send({ title: "Dose times changed", body: `Morning ${fmt(v.am)} · Evening ${fmt(v.pm)} · Bedtime ${fmt(v.night)}` }, {});
+    return send({ title: "Dose times changed", body: `Morning ${fmt(v.am)} · Night ${fmt(v.pm)}` }, {});
   }
   return { skipped: true };
 }
 
+async function once(k: string) {
+  const { error } = await sb.from("reminder_sent").insert({ k });
+  return !error;
+}
+
 async function handleTick() {
-  const { day, min } = istNow();
-  if (day < 0 || day >= DAYS) return { skipped: "outside plan" };
-  const times = await getTimes();
-  const { data: done } = await sb.from("dose_log").select("slot,med_id").eq("day", day);
-  const has = new Set((done || []).map((r) => `${r.slot}|${r.med_id}`));
-  const dbSlot = (s: string) => (s === "dawn" || s === "chk" ? "am" : s);
-
-  type Item = { key: string; t: number; label: string; slot: string; ids: string[] };
-  const items: Item[] = [];
-  for (const slot of ["dawn", "am", "noon", "pm", "night"]) {
-    const ids = Object.entries(MEDS).filter(([, m]) => m.slots.includes(slot) && day < m.days).map(([id]) => id);
-    if (ids.length) items.push({ key: slot, t: toMin(times[slot]), label: fmt(times[slot]), slot, ids });
-  }
-  for (const h of CHECK_HOURS) {
-    const t = toMin(`${h}:00`);
-    if (t < toMin(times.night)) items.push({ key: `sp${h}`, t, label: fmt(`${h}:00`), slot: "chk", ids: [`sp${h}`] });
-  }
-
+  const { date, min } = istNow();
   const out: string[] = [];
-  for (const it of items) {
-    const pending = it.ids.filter((id) => !has.has(`${dbSlot(it.slot)}|${id}`));
+
+  // Oxygen break reminders: when the chosen time is up, and again 15 min later if still on break.
+  const { data: last } = await sb.from("o2_event").select("id,kind,at,remind_at,by").order("at", { ascending: false }).order("id", { ascending: false }).limit(1).maybeSingle();
+  if (last && last.kind === "break" && last.remind_at) {
+    const due = new Date(last.remind_at).getTime(), now = Date.now();
+    const mins = Math.round((now - new Date(last.at).getTime()) / 6e4);
+    for (const [ph, at] of [["1", due], ["2", due + 15 * 6e4]] as [string, number][]) {
+      if (now >= at && now < at + 60 * 6e4 && await once(`brk|${last.id}|${ph}`)) {
+        await send({
+          title: ph === "1" ? "Break time is up" : `Still off oxygen · ${mins} min`,
+          body: "Check SpO₂ on room air, then put the oxygen back on and log it.",
+          tag: `brk-${last.id}`,
+        }, { reminders: true });
+        out.push(`brk|${last.id}|${ph}`);
+      }
+    }
+  }
+
+  // Medicine reminders: 10 min before, and 30 min after if not ticked.
+  const times = await getTimes();
+  const { data: done } = await sb.from("med_log2").select("slot,med_id").eq("date", date);
+  const has = new Set((done || []).map((r) => `${r.slot}|${r.med_id}`));
+  for (const slot of SLOTS) {
+    const t = toMin(times[slot]);
+    const pending = Object.keys(MEDS).filter((id) => !has.has(`${slot}|${id}`));
     if (!pending.length) continue;
-    const isCheck = it.slot === "chk";
-    const what = isCheck ? "SpO₂ check" : it.slot === "dawn" ? "Switch off the oxygen" : pending.map(nameOf).join(", ");
     let phase: "b" | "a" | null = null;
-    if (min >= it.t - 15 && min < it.t - 5) phase = "b";
-    else if (min >= it.t + 30 && min < it.t + 60) phase = "a";
+    if (min >= t - 15 && min < t - 5) phase = "b";
+    else if (min >= t + 30 && min < t + 60) phase = "a";
     if (!phase) continue;
-    const k = `${day}|${it.key}|${phase}`;
-    const { error } = await sb.from("reminder_sent").insert({ k });
-    if (error) continue; // already sent
-    const msg: Msg = phase === "b"
-      ? { title: `In 10 min · ${it.label}`, body: what, tag: `r-${day}-${it.key}` }
-      : { title: `Not ticked yet · ${it.label}`, body: `${what}. Tap to open and tick it.`, tag: `r-${day}-${it.key}` };
-    await send(msg, { reminders: true });
+    const k = `${date}|${slot}|${phase}`;
+    if (!(await once(k))) continue;
+    const what = pending.map(nameOf).join(", ");
+    const label = `${SLOT_NAME[slot]} · ${fmt(times[slot])}`;
+    await send(phase === "b"
+      ? { title: `In 10 min · ${label}`, body: what, tag: `r-${date}-${slot}` }
+      : { title: `Not ticked yet · ${label}`, body: `${what}. Tap to open and tick it.`, tag: `r-${date}-${slot}` }, { reminders: true });
     out.push(k);
   }
   return { sent: out };
