@@ -270,6 +270,7 @@ nav.tabs button[aria-current="page"]{color:var(--brand);font-weight:700}
 .flowb{border:1.5px solid currentColor;background:transparent;color:inherit;border-radius:999px;padding:4px 6px 4px 12px;font:inherit;font-size:14px;font-weight:700;letter-spacing:0;text-transform:none;display:flex;align-items:center;gap:6px;min-height:36px}
 .flowb span{background:color-mix(in srgb,currentColor 18%,transparent);border-radius:999px;padding:2px 8px;font-size:12px}
 [hidden]{display:none!important}
+.spoic{width:44px;height:44px;border-radius:12px;background:var(--brand-soft);color:var(--brand);display:grid;place-items:center;flex:none}.spoic svg{width:22px;height:22px}
 .flbl{font-size:14px;font-weight:700;color:var(--ink2);margin-bottom:8px}
 .flowrow{display:flex;align-items:center;gap:10px}.flowrow .unit{font-size:16px;font-weight:700;color:var(--muted)}
 .lowpill{display:inline-block;background:var(--danger-soft);color:var(--danger);font-size:12px;font-weight:700;border-radius:999px;padding:1px 8px;margin-left:4px}
@@ -516,14 +517,19 @@ function o2Hero(){
   const since=clock(rs.at)+(dstr(new Date(rs.at))!==todayS()?' '+whenLow(rs.at):'');
   if(c.kind==='bipap')return '<section class="o2h bipap"><div class="k"><span class="l">'+I.moon+'Oxygen + BiPAP</span>'+flowBtn+'</div>'+
     '<div><div class="big">'+dur(now-new Date(rs.at))+'</div><div class="sub">BiPAP on since '+since+(rs.by?' · started by '+esc(rs.by):'')+'</div></div>'+rdBox+
-    '<div class="acts"><button class="a1 full" data-o2="bipoff">'+I.sun+'BiPAP off, oxygen stays on</button><button class="a2" data-o2="break">'+I.pause+'Take a break</button><button class="a2" data-o2="log">'+I.pulse+'Log SpO₂</button></div></section>';
+    '<div class="acts"><button class="a1 full" data-o2="bipoff">'+I.sun+'BiPAP off, oxygen stays on</button><button class="a2 full" data-o2="break">'+I.pause+'Take a break</button></div></section>';
   return '<section class="o2h on"><div class="k"><span class="l"><span class="livedot"></span>Oxygen on</span>'+flowBtn+'</div>'+
     '<div><div class="big">'+dur(now-new Date(rs.at))+'</div><div class="sub">Running since '+since+(rs.by?' · '+(pv&&pv.kind==='break'?'restarted':'started')+' by '+esc(rs.by):'')+'</div></div>'+rdBox+
-    '<div class="acts"><button class="a1" data-o2="break">'+I.pause+'Take a break</button><button class="a2" data-o2="bipap">'+I.moon+'O₂ + BiPAP</button></div>'+
-    '<button class="lnk" data-o2="log">Log an SpO₂ reading</button></section>';
+    '<div class="acts"><button class="a1" data-o2="break">'+I.pause+'Take a break</button><button class="a2" data-o2="bipap">'+I.moon+'O₂ + BiPAP</button></div>'+'</section>';
 }
 function mmss(ms){const s=Math.max(0,Math.floor(ms/1000)),m=Math.floor(s/60);return m>=60?Math.floor(m/60)+'h '+pad(m%60)+'m':m+'m '+pad(s%60)+'s'}
 
+function spoCard(){
+  const lr=lastReads(1)[0];
+  return '<section class="box" style="flex-direction:row;align-items:center;gap:12px"><span class="spoic">'+I.pulse+'</span><div style="flex:1;min-width:0"><b style="font-size:17px">SpO₂ &amp; pulse</b><div class="note" style="font-size:14px;color:var(--ink2)">'+
+    (lr?'Last '+lr.v+'%'+(isLow(lr.v)?' <span class="lowpill">Low</span>':'')+' '+ctxName(lr.ctx)+(lr.p?' · pulse '+lr.p:'')+' · '+clock(lr.at)+(dstr(new Date(lr.at))!==todayS()?' '+whenLow(lr.at):''):'No readings yet')+
+    '</div></div><button class="btn" data-o2="log" style="flex:none;min-height:44px">Log</button></section>';
+}
 function evText(e){
   const pv=prevOf(e),r=readOf(e),f=e.flow!=null?fl(e.flow):'';
   let what,detail=[];
@@ -553,7 +559,7 @@ function o2DayCard(){
 }
 function renderToday(){
   let h='';
-  if(sel===todayS())h+=o2Hero();
+  if(sel===todayS())h+=o2Hero()+spoCard();
   h+=installBanner();
   h+=o2DayCard();
   let g=0;MEDS.forEach(m=>m.slots.forEach(s=>{if(log.has(key(sel,s,m.id)))g++}));
@@ -692,9 +698,9 @@ function openBipap(){
     close=>{bindFlow('bp');bindWhen('bp');$('bp-go').onclick=()=>{const r=readPair('bp',false);if(!r)return;const f=readFlow('bp','bp-err');if(f==null)return;const w=readWhen('bp','bp-err');if(!w)return;close();addEvent('bipap',r.val,r.pr,'o2',0,'O₂ + BiPAP started · '+fl(f),f,w.at)}});
 }
 function openLog(){
-  const c=current();let ctx=c&&c.kind==='break'?'air':'o2';
-  openSheet('<div class="sh-hd"><h2>Log SpO₂</h2><button class="x" data-close aria-label="Close">×</button></div>'+
-    '<div class="chips" role="group" aria-label="Taken"><button type="button" data-cx="o2" aria-pressed="'+(ctx==='o2')+'">On oxygen</button><button type="button" data-cx="air" aria-pressed="'+(ctx==='air')+'">Room air</button></div>'+
+  const c=current();let ctx=c&&(c.kind==='on'||c.kind==='bipap')?'o2':'air';
+  openSheet('<div class="sh-hd"><h2>Log SpO₂ &amp; pulse</h2><button class="x" data-close aria-label="Close">×</button></div>'+
+    '<div class="flbl" style="margin-bottom:-8px">Taken</div><div class="chips" role="group" aria-label="Taken"><button type="button" data-cx="o2" aria-pressed="'+(ctx==='o2')+'">On oxygen</button><button type="button" data-cx="air" aria-pressed="'+(ctx==='air')+'">Room air</button></div>'+
     numPair('lg','SpO₂')+'<div class="err" id="lg-err" hidden></div><button class="btn wide" id="lg-go">Save reading</button>',
     close=>{
       document.querySelectorAll('[data-cx]').forEach(b=>b.onclick=()=>{ctx=b.dataset.cx;document.querySelectorAll('[data-cx]').forEach(x=>x.setAttribute('aria-pressed',String(x===b)))});
