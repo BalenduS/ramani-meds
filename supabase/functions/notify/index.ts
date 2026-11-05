@@ -38,6 +38,15 @@ async function getTimes() {
   return Object.assign({ am: "08:00", pm: "20:00" }, data?.value || {}) as Record<string, string>;
 }
 const nameOf = (id: string) => MEDS[id]?.n || id;
+async function getMachines() {
+  const { data } = await sb.from("settings").select("value").eq("key", "machines").maybeSingle();
+  const v = data?.value || {};
+  return { names: (v.names || ["Machine 1", "Machine 2"]) as string[], hours: Number(v.hours) || 4 };
+}
+function dur(ms: number) {
+  const m = Math.max(0, Math.round(ms / 6e4)), h = Math.floor(m / 60);
+  return h ? `${h} h ${String(m % 60).padStart(2, "0")} m` : `${m} min`;
+}
 const ctxName = (c: string) => (c === "o2" ? "on O₂" : "room air");
 
 type Msg = { title: string; body: string; tag?: string };
@@ -91,7 +100,13 @@ async function handleEvent(p: any) {
       by += ` · for ${fmt(`${d.getUTCHours()}:${String(d.getUTCMinutes()).padStart(2, "0")}`)}`;
     }
     let title: string, body: string;
-    if (r.k !== "break" && r.prev === r.k) {
+    const mc = await getMachines();
+    const mn = (m: number | null) => (m ? mc.names[m - 1] || `Machine ${m}` : "");
+    const swapped = r.k !== "break" && r.machine && r.prevmachine && r.machine !== r.prevmachine;
+    if (swapped && r.prev === r.k) {
+      title = `Machines swapped · now ${mn(r.machine)}`;
+      body = [`${mn(r.prevmachine)} off`, r.flow ? fl(r.flow) : "", by].filter(Boolean).join(" · ");
+    } else if (r.k !== "break" && r.prev === r.k) {
       title = `Oxygen flow changed to ${fl(r.flow)}`;
       body = [r.prevflow != null ? `Was ${fl(r.prevflow)}` : "", by].filter(Boolean).join(" · ");
     } else if (r.k === "break") {
@@ -99,16 +114,16 @@ async function handleEvent(p: any) {
       body = [sp, r.remind ? `reminder in ${r.remind} min` : "", by].filter(Boolean).join(" · ");
     } else if (r.k === "bipap") {
       title = `Oxygen + BiPAP started${r.flow ? ` · ${fl(r.flow)}` : ""}`;
-      body = [sp, by].filter(Boolean).join(" · ");
+      body = [sp, mn(r.machine), by].filter(Boolean).join(" · ");
     } else if (r.prev === "break") {
       title = low ? `Low SpO₂ ${r.v}% after the break` : `Break over · oxygen back on${r.flow ? ` · ${fl(r.flow)}` : ""}`;
-      body = [sp, r.mins != null ? `${r.mins} min off oxygen` : "", by].filter(Boolean).join(" · ");
+      body = [sp, r.mins != null ? `${r.mins} min off oxygen` : "", r.machine ? (swapped ? `swapped to ${mn(r.machine)}` : mn(r.machine)) : "", by].filter(Boolean).join(" · ");
     } else if (r.prev === "bipap") {
       title = "BiPAP off · oxygen continues";
-      body = by;
+      body = [swapped ? `swapped to ${mn(r.machine)}` : "", by].filter(Boolean).join(" · ");
     } else {
       title = `Oxygen on${r.flow ? ` · ${fl(r.flow)}` : ""}`;
-      body = [sp, by].filter(Boolean).join(" · ");
+      body = [sp, mn(r.machine), by].filter(Boolean).join(" · ");
     }
     // A low reading goes to everyone, including the person who logged it.
     return send({ title, body, tag: low ? "low-spo2" : undefined }, { exclude: low ? null : r.by });
@@ -154,6 +169,35 @@ async function handleTick() {
           tag: `brk-${last.id}`,
         }, { reminders: true });
         out.push(`brk|${last.id}|${ph}`);
+      }
+    }
+  }
+
+  // Machine swap reminders: when the swap interval is up, and again 30 min later if not swapped.
+  // Not sent while on a break (oxygen off); it goes out once oxygen is back on, if still due.
+  const { data: evs } = await sb.from("o2_event").select("id,kind,at,machine").order("at", { ascending: false }).order("id", { ascending: false }).limit(200);
+  if (evs && evs.length && evs[0].kind !== "break") {
+    const j = evs.findIndex((e) => e.machine);
+    if (j >= 0) {
+      const M = evs[j].machine;
+      let st = evs[j];
+      for (let k = j + 1; k < evs.length; k++) {
+        if (evs[k].kind === "break") continue;
+        if (evs[k].machine === M) { st = evs[k]; continue; }
+        break;
+      }
+      const mc = await getMachines();
+      const name = mc.names[M - 1] || `Machine ${M}`, nextName = mc.names[2 - M] || `Machine ${3 - M}`;
+      const due = new Date(st.at).getTime() + mc.hours * 36e5, now = Date.now();
+      for (const [ph, at] of [["1", due], ["2", due + 30 * 6e4]] as [string, number][]) {
+        if (now >= at && now < at + 60 * 6e4 && await once(`swap|${st.id}|${ph}`)) {
+          await send({
+            title: ph === "1" ? "Time to swap machines" : `Swap overdue · ${name} on ${dur(now - new Date(st.at).getTime())}`,
+            body: `${name} has run ${dur(now - new Date(st.at).getTime())}. Switch to ${nextName}, then tap Swap in the app.`,
+            tag: `swap-${st.id}`,
+          }, { reminders: true });
+          out.push(`swap|${st.id}|${ph}`);
+        }
       }
     }
   }

@@ -270,6 +270,18 @@ nav.tabs button[aria-current="page"]{color:var(--brand);font-weight:700}
 .flowb{border:1.5px solid currentColor;background:transparent;color:inherit;border-radius:999px;padding:4px 6px 4px 12px;font:inherit;font-size:14px;font-weight:700;letter-spacing:0;text-transform:none;display:flex;align-items:center;gap:6px;min-height:36px}
 .flowb span{background:color-mix(in srgb,currentColor 18%,transparent);border-radius:999px;padding:2px 8px;font-size:12px}
 [hidden]{display:none!important}
+.mpan{background:color-mix(in srgb,var(--on-strong) 15%,transparent);border-radius:14px;padding:12px;display:flex;flex-direction:column;gap:8px}
+.mpan .mhd{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}
+.mtag{background:var(--surface);color:var(--c);border-radius:999px;padding:3px 12px;font-weight:700;font-size:15px}
+.mpan .mt{font-size:14px;font-weight:700}
+.mbar{height:6px;border-radius:3px;background:color-mix(in srgb,var(--on-strong) 25%,transparent);overflow:hidden}.mbar i{display:block;height:100%;background:var(--on-strong)}
+.msub{font-size:13px;opacity:.9}
+.mpan .a2{min-height:46px}
+.mpan.over{background:var(--warn-soft);color:var(--ink)}
+.mpan.over .mt{color:var(--warn)}.mpan.over .mbar{background:color-mix(in srgb,var(--warn) 25%,transparent)}.mpan.over .mbar i{background:var(--warn)}
+.mpan.over .mtag{background:var(--surface);color:var(--ink)}
+.mpan.over .a1{background:var(--warn);color:var(--surface)}
+.dot.sw{box-shadow:0 0 0 3px var(--surface),0 0 0 5px var(--ink2)}
 .spoic{width:44px;height:44px;border-radius:12px;background:var(--brand-soft);color:var(--brand);display:grid;place-items:center;flex:none}.spoic svg{width:22px;height:22px}
 .flbl{font-size:14px;font-weight:700;color:var(--ink2);margin-bottom:8px}
 .flowrow{display:flex;align-items:center;gap:10px}.flowrow .unit{font-size:16px;font-weight:700;color:var(--muted)}
@@ -357,6 +369,7 @@ const I={
   dl:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v11M7 10l5 5 5-5M5 20h14"/></svg>',
   bell:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 16V11a6 6 0 0 1 12 0v5l1.5 2h-15z"/><path d="M10 20a2 2 0 0 0 4 0"/></svg>',
   help:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s-7-4.4-7-10.5A4.5 4.5 0 0 1 12 7a4.5 4.5 0 0 1 7 3.5C19 16.6 12 21 12 21z"/></svg>',
+  swap:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 8h14l-4-4M20 16H6l4 4"/></svg>',
   warn:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l9 16H3zM12 10v4M12 17h.01"/></svg>'
 };
 const TYPES={tab:{icon:'tab'},neb:{icon:'neb'}};
@@ -398,6 +411,7 @@ let log=new Map(Object.entries(ls.get('rm2-log',{})));
 let events=ls.get('rm2-ev',[]),reads=ls.get('rm2-rd',[]);
 let oldLog=new Map(Object.entries(ls.get('rm-old-log',{}))),oldSpo=ls.get('rm-old-spo',[]);
 let alertAt=ls.get('rm-alert',null),stock=ls.get('rm-stock',{});
+let mach=ls.get('rm-mach',{names:['Machine 1','Machine 2'],hours:4});
 let tab='today',sub=null,range=7,shown=30,live=false,deferredInstall=null,installHidden=ls.get('rm-inst-hide',false);
 let push=ls.get('rm-push',{on:false,activity:true,reminders:true}),pushHidden=ls.get('rm-push-hide',false);
 let remindMin=ls.get('rm-remind',30),busy=false;
@@ -497,6 +511,27 @@ function readLine(r,label){
 function lastFlow(){const e=evSorted();for(let i=e.length-1;i>=0;i--)if(e[i].flow!=null)return +e[i].flow;return 2}
 const fl=v=>(v==null?'':(+v).toString().replace(/\.0$/,''))+' L/min';
 function runStart(c){const e=evSorted();let i=e.findIndex(x=>x.id===c.id);while(i>0&&e[i-1].kind===c.kind)i--;return e[i]}
+const mName=m=>m?esc(mach.names[m-1]||('Machine '+m)):'';
+const other=m=>m===1?2:1;
+function curMachine(){const e=evSorted();for(let i=e.length-1;i>=0;i--)if(e[i].machine)return e[i].machine;return null}
+function machBefore(ev){const e=evSorted();let i=e.findIndex(x=>x.id===ev.id);for(i--;i>=0;i--)if(e[i].machine)return e[i].machine;return null}
+/* start of the current machine's run: back through the same machine, skipping breaks (machine off) */
+function swapStart(){
+  const e=evSorted();let j=e.length-1;while(j>=0&&!e[j].machine)j--;if(j<0)return null;
+  const M=e[j].machine;let st=e[j];
+  for(let k=j-1;k>=0;k--){if(e[k].kind==='break')continue;if(e[k].machine===M){st=e[k];continue}break}
+  return{m:M,ev:st};
+}
+function machPanel(c){
+  if(!c||c.kind==='break')return'';
+  const ss=swapStart(),cm=curMachine();
+  if(!cm)return '<div class="mpan"><div class="mhd"><b>Which machine is running?</b></div><div class="acts"><button class="a2" data-setm="1">'+mName(1)+'</button><button class="a2" data-setm="2">'+mName(2)+'</button></div></div>';
+  const st=new Date(ss.ev.at).getTime(),due=st+mach.hours*36e5,now=Date.now(),over=now>=due;
+  const p=Math.min(100,Math.round((now-st)/(due-st)*100));
+  return '<div class="mpan'+(over?' over':'')+'"><div class="mhd"><span class="mtag">'+mName(cm)+'</span><span class="mt">'+(over?'Swap due · '+dur(now-due)+' over':'Swap at '+clock(new Date(due).toISOString()))+'</span></div>'+
+    '<div class="mbar"><i style="width:'+p+'%"></i></div><div class="msub">Running '+dur(now-st)+' · since '+clock(ss.ev.at)+(dstr(new Date(ss.ev.at))!==todayS()?' '+whenLow(ss.ev.at):'')+' · swap every '+mach.hours+' h</div>'+
+    '<button class="'+(over?'a1':'a2')+' full" data-o2="swap">'+I.swap+'Swap to '+mName(other(cm))+'</button></div>';
+}
 function o2Hero(){
   const c=current(),now=Date.now();
   if(!c)return '<section class="o2h unk"><div class="k"><span class="l">'+I.pulse+'Oxygen</span></div><div><div class="sub">Not recorded yet. Tap what is running right now. You can set an earlier start time.</div></div>'+
@@ -516,10 +551,10 @@ function o2Hero(){
   const rs=runStart(c),pv=prevOf(rs);
   const since=clock(rs.at)+(dstr(new Date(rs.at))!==todayS()?' '+whenLow(rs.at):'');
   if(c.kind==='bipap')return '<section class="o2h bipap"><div class="k"><span class="l">'+I.moon+'Oxygen + BiPAP</span>'+flowBtn+'</div>'+
-    '<div><div class="big">'+dur(now-new Date(rs.at))+'</div><div class="sub">BiPAP on since '+since+(rs.by?' · started by '+esc(rs.by):'')+'</div></div>'+rdBox+
+    '<div><div class="big">'+dur(now-new Date(rs.at))+'</div><div class="sub">BiPAP on since '+since+(rs.by?' · started by '+esc(rs.by):'')+'</div></div>'+machPanel(c)+rdBox+
     '<div class="acts"><button class="a1 full" data-o2="bipoff">'+I.sun+'BiPAP off, oxygen stays on</button><button class="a2 full" data-o2="break">'+I.pause+'Take a break</button></div></section>';
   return '<section class="o2h on"><div class="k"><span class="l"><span class="livedot"></span>Oxygen on</span>'+flowBtn+'</div>'+
-    '<div><div class="big">'+dur(now-new Date(rs.at))+'</div><div class="sub">Running since '+since+(rs.by?' · '+(pv&&pv.kind==='break'?'restarted':'started')+' by '+esc(rs.by):'')+'</div></div>'+rdBox+
+    '<div><div class="big">'+dur(now-new Date(rs.at))+'</div><div class="sub">Running since '+since+(rs.by?' · '+(pv&&pv.kind==='break'?'restarted':'started')+' by '+esc(rs.by):'')+'</div></div>'+machPanel(c)+rdBox+
     '<div class="acts"><button class="a1" data-o2="break">'+I.pause+'Take a break</button><button class="a2" data-o2="bipap">'+I.moon+'O₂ + BiPAP</button></div>'+'</section>';
 }
 function mmss(ms){const s=Math.max(0,Math.floor(ms/1000)),m=Math.floor(s/60);return m>=60?Math.floor(m/60)+'h '+pad(m%60)+'m':m+'m '+pad(s%60)+'s'}
@@ -533,29 +568,32 @@ function spoCard(){
 function evText(e){
   const pv=prevOf(e),r=readOf(e),f=e.flow!=null?fl(e.flow):'';
   let what,detail=[];
+  const mb=e.machine?machBefore(e):null,mn=e.machine?' · '+mName(e.machine):'';
   if(e.kind==='break')what='Break started';
+  else if(pv&&pv.kind===e.kind&&e.machine&&mb&&mb!==e.machine)what='Swapped to '+mName(e.machine)+(pv.flow!=e.flow&&f?' · '+f:'');
   else if(pv&&pv.kind===e.kind)what='Flow changed to '+f;
-  else if(e.kind==='bipap')what='Oxygen + BiPAP started'+(f?' · '+f:'');
-  else if(pv&&pv.kind==='break'){what='Break ended · oxygen back on'+(f?' · '+f:'');detail.push(dur(new Date(e.at)-new Date(pv.at))+' break')}
-  else if(pv&&pv.kind==='bipap')what='BiPAP off · oxygen continues';
-  else what='Oxygen on'+(f?' · '+f:'');
+  else if(e.kind==='bipap')what='Oxygen + BiPAP started'+(f?' · '+f:'')+mn;
+  else if(pv&&pv.kind==='break'){what='Break ended · oxygen back on'+(f?' · '+f:'')+(mb&&e.machine&&mb!==e.machine?' · swapped to '+mName(e.machine):mn);detail.push(dur(new Date(e.at)-new Date(pv.at))+' break')}
+  else if(pv&&pv.kind==='bipap')what='BiPAP off · oxygen continues'+(mb&&e.machine&&mb!==e.machine?' · swapped to '+mName(e.machine):'');
+  else what='Oxygen on'+(f?' · '+f:'')+mn;
   if(r)what+=' · SpO₂ '+r.v+'% '+ctxName(r.ctx);
   if(r&&r.p)detail.push('pulse '+r.p);
   if(e.by)detail.unshift(esc(e.by));
   return{what,detail:detail.join(' · '),low:r&&isLow(r.v)};
 }
 const KCOL={on:'var(--m-o2)',break:'var(--warn)',bipap:'var(--m-bip)'};
+const isSwap=e=>{const pv=prevOf(e),mb=e.machine?machBefore(e):null;return !!(e.machine&&mb&&mb!==e.machine&&pv&&pv.kind!=='break')};
 function o2DayCard(){
   const segs=segments(sel),tot=dayTotals(sel),dayStart=pdate(sel).getTime();
   const bar=segs.map(s=>'<span style="width:'+((s.b-s.a)/864e5*100).toFixed(2)+'%;background:'+(s.k?KCOL[s.k]:'transparent')+'"></span>').join('');
   const rows=[];
-  evSorted().filter(e=>dstr(new Date(e.at))===sel).forEach(e=>{const t=evText(e);rows.push({at:e.at,h:'<button class="evrow" data-ev="'+e.id+'"><span class="t">'+clock(e.at)+'</span><span class="dot" style="background:'+KCOL[e.kind]+'"></span><span><b class="'+(t.low?'lowtxt':'')+'">'+t.what+'</b><small>'+t.detail+'</small></span></button>'})});
+  evSorted().filter(e=>dstr(new Date(e.at))===sel).forEach(e=>{const t=evText(e);rows.push({at:e.at,h:'<button class="evrow" data-ev="'+e.id+'"><span class="t">'+clock(e.at)+'</span><span class="dot'+(isSwap(e)?' sw':'')+'" style="background:'+KCOL[e.kind]+'"></span><span><b class="'+(t.low?'lowtxt':'')+'">'+t.what+'</b><small>'+t.detail+'</small></span></button>'})});
   reads.filter(r=>!r.ev&&dstr(new Date(r.at))===sel).forEach(r=>rows.push({at:r.at,h:'<button class="evrow" data-rd="'+r.id+'"><span class="t">'+clock(r.at)+'</span><span class="dot" style="background:var(--brand)"></span><span><b class="'+(isLow(r.v)?'lowtxt':'')+'">SpO₂ '+r.v+'% '+ctxName(r.ctx)+'</b><small>'+esc(r.by||'')+(r.p?' · pulse '+r.p:'')+'</small></span></button>'}));
   rows.sort((a,b)=>new Date(b.at)-new Date(a.at));
   return '<section class="box"><div class="boxhd"><h2>'+(sel===todayS()?'Oxygen today':'Oxygen')+'</h2><span>'+(tot.on?dur(tot.on)+' on':'')+(tot.nb?' · '+tot.nb+' break'+(tot.nb>1?'s':''):'')+'</span></div>'+
     '<div class="tl" role="img" aria-label="Oxygen through the day">'+bar+'</div><div class="tlax"><span>12 AM</span><span>6 AM</span><span>12 PM</span><span>6 PM</span><span>12 AM</span></div>'+
     '<div class="legend"><span><i style="background:var(--m-bip)"></i>O₂ + BiPAP</span><span><i style="background:var(--m-o2)"></i>Oxygen</span><span><i style="background:var(--warn)"></i>Break</span></div>'+
-    (rows.length?'<div>'+rows.map(r=>r.h).join('')+'</div><p class="note" style="margin:0">Tap an entry to fix its time or flow, or remove it.</p>':'<p class="note" style="margin:0">Nothing logged '+(sel===todayS()?'yet today':'on this day')+'.</p>')+'</section>';
+    (rows.length?'<div>'+rows.map(r=>r.h).join('')+'</div><p class="note" style="margin:0">Tap an entry to fix its time, flow or machine, or remove it.</p>':'<p class="note" style="margin:0">Nothing logged '+(sel===todayS()?'yet today':'on this day')+'.</p>')+'</section>';
 }
 function renderToday(){
   let h='';
@@ -585,6 +623,7 @@ function bindToday(){
   v.querySelectorAll('[data-why]').forEach(b=>b.onclick=()=>openWhy(b.dataset.why));
   v.querySelectorAll('.dose').forEach(b=>b.onclick=()=>{const s=b.dataset.s,id=b.dataset.m;if(log.has(key(sel,s,id)))confirmUndo(sel,s,id);else setDose(sel,s,[id],true)});
   v.querySelectorAll('[data-o2]').forEach(b=>b.onclick=()=>o2Action(b.dataset.o2));
+  v.querySelectorAll('[data-setm]').forEach(b=>b.onclick=()=>setMachineNow(+b.dataset.setm));
   v.querySelectorAll('[data-ev]').forEach(b=>b.onclick=()=>confirmEvDel(+b.dataset.ev));
   v.querySelectorAll('[data-rd]').forEach(b=>b.onclick=()=>confirmRdDel(+b.dataset.rd));
   bindInstall();bindStock();
@@ -596,7 +635,8 @@ function need(){if(!pin||!me){openSetup();return false}return true}
 function o2Action(a){
   if(!need())return;
   if(a==='on')return openOn();
-  if(a==='bipoff')return addEvent('on',null,null,null,0,'BiPAP off · oxygen stays on',lastFlow(),null);
+  if(a==='bipoff')return addEvent('on',null,null,null,0,'BiPAP off · oxygen stays on',lastFlow(),null,curMachine());
+  if(a==='swap')return openSwap();
   if(a==='flow')return openFlow();
   if(a==='break')return openBreakStart();
   if(a==='end')return openBreakEnd();
@@ -629,6 +669,25 @@ function bindFlow(id){
   document.querySelectorAll('[data-fl]').forEach(b=>b.onclick=()=>{inp.value=b.dataset.fl;sync()});
 }
 function readFlow(id,errId){const v=parseFloat($(id+'-f').value);if(isNaN(v)||v<=0||v>15){const e=$(errId);e.textContent='Enter the flow in litres per minute, for example 2.';e.hidden=false;return null}return Math.round(v*10)/10}
+/* machine picker */
+function machineField(id,val,label){
+  return '<div><div class="flbl">'+(label||'Machine')+'</div><div class="chips" role="group">'+[1,2].map(m=>'<button type="button" data-mc="'+id+'" data-v="'+m+'" aria-pressed="'+(m===val)+'">'+mName(m)+'</button>').join('')+'</div></div>';
+}
+function bindMachine(id){document.querySelectorAll('[data-mc="'+id+'"]').forEach(b=>b.onclick=()=>document.querySelectorAll('[data-mc="'+id+'"]').forEach(x=>x.setAttribute('aria-pressed',String(x===b))))}
+function readMachine(id){const b=document.querySelector('[data-mc="'+id+'"][aria-pressed="true"]');return b?+b.dataset.v:null}
+function openSwap(){
+  const c=current(),cm=curMachine(),ss=swapStart();if(!c||c.kind==='break'||!cm)return;
+  openSheet('<div class="sh-hd"><h2>Swap machines</h2><button class="x" data-close aria-label="Close">×</button></div>'+
+    '<div class="cmp"><div><b style="font-size:20px">'+mName(cm)+'</b><small>Ran '+dur(Date.now()-new Date(ss.ev.at))+'</small></div>'+I.arrow+'<div><b style="font-size:20px">'+mName(other(cm))+'</b><small>Now running</small></div></div>'+
+    flowField('sw',c.flow!=null?c.flow:lastFlow())+whenField('sw','Swapped')+'<div class="err" id="sw-err" hidden></div>'+
+    '<button class="btn wide" id="sw-go">Save · now on '+mName(other(cm))+'</button>',
+    close=>{bindFlow('sw');bindWhen('sw');$('sw-go').onclick=()=>{$('sw-err').hidden=true;const f=readFlow('sw','sw-err');if(f==null)return;const w=readWhen('sw','sw-err');if(!w)return;close();addEvent(c.kind,null,null,null,0,'Swapped to '+mName(other(cm)),f,w.at,other(cm))}});
+}
+async function setMachineNow(m){
+  const c=current();if(!c||c.kind==='break'||!need())return;const rs=runStart(c);
+  const{error}=await sb.rpc('o2_edit',{p_pin:pin,p_id:rs.id,p_at:rs.at,p_flow:rs.flow!=null?+rs.flow:null,p_machine:m});
+  if(error)return rpcErr(error);await load();toast(mName(m)+' running');
+}
 /* when: now or earlier */
 function whenField(id,label){
   return '<div><div class="flbl">'+(label||'When')+'</div><div class="chips" role="group"><button type="button" data-wn="'+id+'" data-v="now" aria-pressed="true">Now</button><button type="button" data-wn="'+id+'" data-v="earlier" aria-pressed="false">Earlier</button></div>'+
@@ -649,15 +708,15 @@ function readWhen(id,errId){
 }
 function openOn(){
   openSheet('<div class="sh-hd"><h2>Oxygen on</h2><button class="x" data-close aria-label="Close">×</button></div>'+
-    flowField('on',lastFlow())+whenField('on','Started')+'<div class="err" id="on-err" hidden></div><button class="btn wide" id="on-go" style="background:var(--m-o2);color:var(--on-strong)">Save</button>',
-    close=>{bindFlow('on');bindWhen('on');$('on-go').onclick=()=>{$('on-err').hidden=true;const f=readFlow('on','on-err');if(f==null)return;const w=readWhen('on','on-err');if(!w)return;close();addEvent('on',null,null,null,0,'Oxygen on · '+fl(f),f,w.at)}});
+    flowField('on',lastFlow())+machineField('on',curMachine()||1)+whenField('on','Started')+'<div class="err" id="on-err" hidden></div><button class="btn wide" id="on-go" style="background:var(--m-o2);color:var(--on-strong)">Save</button>',
+    close=>{bindFlow('on');bindMachine('on');bindWhen('on');$('on-go').onclick=()=>{$('on-err').hidden=true;const f=readFlow('on','on-err');if(f==null)return;const w=readWhen('on','on-err');if(!w)return;const m=readMachine('on');close();addEvent('on',null,null,null,0,'Oxygen on · '+fl(f)+' · '+mName(m),f,w.at,m)}});
 }
 function openFlow(){
   const c=current();if(!c||c.kind==='break')return;
   openSheet('<div class="sh-hd"><h2>Change oxygen flow</h2><button class="x" data-close aria-label="Close">×</button></div>'+
     '<p class="note" style="margin:0;font-size:15px;color:var(--ink2)">Now '+fl(c.flow!=null?c.flow:lastFlow())+'. The change is logged with the time and your name.</p>'+
     flowField('fw',c.flow!=null?c.flow:lastFlow(),'New flow')+whenField('fw','Changed')+'<div class="err" id="fw-err" hidden></div><button class="btn wide" id="fw-go">Save flow</button>',
-    close=>{bindFlow('fw');bindWhen('fw');$('fw-go').onclick=()=>{$('fw-err').hidden=true;const f=readFlow('fw','fw-err');if(f==null)return;const w=readWhen('fw','fw-err');if(!w)return;close();addEvent(c.kind,null,null,null,0,'Flow set to '+fl(f),f,w.at)}});
+    close=>{bindFlow('fw');bindWhen('fw');$('fw-go').onclick=()=>{$('fw-err').hidden=true;const f=readFlow('fw','fw-err');if(f==null)return;const w=readWhen('fw','fw-err');if(!w)return;close();addEvent(c.kind,null,null,null,0,'Flow set to '+fl(f),f,w.at,curMachine())}});
 }
 function openBreakStart(){
   const opts=[[15,'15 min'],[30,'30 min'],[45,'45 min'],[0,'No reminder']];
@@ -678,24 +737,24 @@ function openBreakEnd(){
   openSheet('<div><div class="eyebrow wc">Step 2 of 2 · After the break · '+mins+' min</div><h2 style="font-size:24px;margin-top:4px">Check SpO₂ on room air, before oxygen goes back on</h2></div>'+
     numPair('be','SpO₂ on room air')+
     (before?'<div class="cmp"><div><b>'+before.v+'%</b><small>Before · on O₂</small></div>'+I.arrow+'<div><b id="be-after">—</b><small>After · room air</small></div></div><div class="note" id="be-drop" style="margin-top:-8px"></div>':'')+
-    '<div class="lowbox" id="be-low" hidden></div>'+flowField('be',lastFlow(),'Oxygen back on at')+whenField('be','Oxygen back on')+
+    '<div class="lowbox" id="be-low" hidden></div>'+flowField('be',lastFlow(),'Oxygen back on at')+machineField('be',curMachine()||1,'On machine')+whenField('be','Oxygen back on')+
     '<div class="err" id="be-err" hidden></div>'+
     '<button class="btn wide" id="be-go" style="background:var(--m-o2);color:var(--on-strong)">Save · oxygen back on</button><button class="btn ghost" data-close style="height:48px;border:0">Not yet, keep break running</button>',
     close=>{
-      bindFlow('be');bindWhen('be');
+      bindFlow('be');bindMachine('be');bindWhen('be');
       const inp=$('be-v'),upd=()=>{const v=parseInt(inp.value,10),ok=!isNaN(v)&&v>=50&&v<=100;
         if(before){$('be-after').textContent=ok?v+'%':'—';$('be-after').className=ok&&isLow(v)?'lowtxt':'';
           const d=ok?before.v-v:null;$('be-drop').textContent=d==null?'':d>0?'Dropped '+d+' point'+(d>1?'s':'')+' over the '+mins+'-minute break.':d===0?'Same as before the break.':'Up '+(-d)+' over the break.'}
         const lo=ok&&isLow(v);$('be-low').hidden=!lo;if(lo)$('be-low').textContent='Below '+alertAt+'%, the level set by the family. Put oxygen back on now. If she is breathless, call the emergency number in Help.'};
       inp.addEventListener('input',upd);
-      $('be-go').onclick=()=>{const r=readPair('be',true);if(!r)return;const f=readFlow('be','be-err');if(f==null)return;const w=readWhen('be','be-err');if(!w)return;close();addEvent('on',r.val,r.pr,'air',0,'Oxygen back on · '+fl(f),f,w.at)};
+      $('be-go').onclick=()=>{const r=readPair('be',true);if(!r)return;const f=readFlow('be','be-err');if(f==null)return;const w=readWhen('be','be-err');if(!w)return;const m=readMachine('be');close();addEvent('on',r.val,r.pr,'air',0,'Oxygen back on · '+fl(f)+' · '+mName(m),f,w.at,m)};
     });
 }
 function openBipap(){
   openSheet('<div><div class="eyebrow bc">Bedtime</div><h2 style="font-size:24px;margin-top:4px">Start oxygen + BiPAP</h2><p class="note" style="margin:6px 0 0;font-size:15px;color:var(--ink2)">An SpO₂ reading before sleep is optional.</p></div>'+
-    numPair('bp','SpO₂ on O₂')+flowField('bp',lastFlow())+whenField('bp','Started')+'<div class="err" id="bp-err" hidden></div>'+
+    numPair('bp','SpO₂ on O₂')+flowField('bp',lastFlow())+machineField('bp',curMachine()||1)+whenField('bp','Started')+'<div class="err" id="bp-err" hidden></div>'+
     '<button class="btn wide" id="bp-go" style="background:var(--m-bip);color:var(--on-strong)">Start O₂ + BiPAP</button>',
-    close=>{bindFlow('bp');bindWhen('bp');$('bp-go').onclick=()=>{const r=readPair('bp',false);if(!r)return;const f=readFlow('bp','bp-err');if(f==null)return;const w=readWhen('bp','bp-err');if(!w)return;close();addEvent('bipap',r.val,r.pr,'o2',0,'O₂ + BiPAP started · '+fl(f),f,w.at)}});
+    close=>{bindFlow('bp');bindMachine('bp');bindWhen('bp');$('bp-go').onclick=()=>{const r=readPair('bp',false);if(!r)return;const f=readFlow('bp','bp-err');if(f==null)return;const w=readWhen('bp','bp-err');if(!w)return;const m=readMachine('bp');close();addEvent('bipap',r.val,r.pr,'o2',0,'O₂ + BiPAP started · '+fl(f)+' · '+mName(m),f,w.at,m)}});
 }
 function openLog(){
   const c=current();let ctx=c&&(c.kind==='on'||c.kind==='bipap')?'o2':'air';
@@ -709,9 +768,9 @@ function openLog(){
         if(error)return rpcErr(error);await load();toast('SpO₂ '+r.val+'% saved'+(isLow(r.val)?' · below '+alertAt+'%':''))};
     });
 }
-async function addEvent(kind,val,pr,ctx,rm,msg,flow,at){
+async function addEvent(kind,val,pr,ctx,rm,msg,flow,at,machine){
   if(busy)return;busy=true;
-  const args={p_pin:pin,p_kind:kind,p_spo2:val,p_pulse:pr,p_ctx:ctx,p_remind_min:rm||0,p_by:me,p_flow:flow==null?null:flow};if(at)args.p_at=at;
+  const args={p_pin:pin,p_kind:kind,p_spo2:val,p_pulse:pr,p_ctx:ctx,p_remind_min:rm||0,p_by:me,p_flow:flow==null?null:flow,p_machine:machine||null};if(at)args.p_at=at;
   const{error}=sb?await sb.rpc('o2_add',args):{error:{message:'offline'}};
   busy=false;
   if(error)return /bad_time/.test(error.message)?toast('That time is too far back. Pick a time in the last 2 days.'):rpcErr(error);
@@ -728,18 +787,18 @@ function confirmEvDel(id){
   openSheet('<div class="sh-hd"><h2>Edit entry</h2><button class="x" data-close aria-label="Close">×</button></div><p style="margin:0"><b>'+t.what+'</b><br><span class="note">Logged by '+esc(e.by||'someone')+'</span></p>'+
     '<div><div class="flbl">Time it happened</div><div class="chips" role="group"><button type="button" data-dy="0" aria-pressed="'+!isY+'">Today</button><button type="button" data-dy="1" aria-pressed="'+isY+'">Yesterday</button></div>'+
     '<label class="field" for="ed-t" style="margin-top:8px">Time<input type="time" id="ed-t" value="'+pad(d.getHours())+':'+pad(d.getMinutes())+'"></label></div>'+
-    (hasFlow?flowField('ed',e.flow!=null?e.flow:lastFlow()):'')+
+    (hasFlow?flowField('ed',e.flow!=null?e.flow:lastFlow())+machineField('ed',e.machine):'')+
     '<div class="err" id="ed-err" hidden></div><button class="btn wide" id="ed-go">Save changes</button>'+
     '<button class="btn ghost" id="del" style="height:48px;color:var(--danger)">Remove this entry</button>',
     close=>{
       let dy=isY?1:0;document.querySelectorAll('[data-dy]').forEach(b=>b.onclick=()=>{dy=+b.dataset.dy;document.querySelectorAll('[data-dy]').forEach(x=>x.setAttribute('aria-pressed',String(x===b)))});
-      if(hasFlow)bindFlow('ed');
+      if(hasFlow){bindFlow('ed');bindMachine('ed')}
       $('ed-go').onclick=async()=>{const err=$('ed-err');err.hidden=true;const tv=$('ed-t').value;if(!tv){err.textContent='Pick a time.';err.hidden=false;return}
         const[h,m]=tv.split(':').map(Number),nd=new Date();nd.setDate(nd.getDate()-dy);nd.setHours(h,m,0,0);
         if(nd.getTime()>Date.now()+60e3){err.textContent='That time is later than now.';err.hidden=false;return}
         const f=hasFlow?readFlow('ed','ed-err'):null;if(hasFlow&&f==null)return;
         if(!need())return;close();
-        const{error}=await sb.rpc('o2_edit',{p_pin:pin,p_id:id,p_at:nd.toISOString(),p_flow:f});
+        const{error}=await sb.rpc('o2_edit',{p_pin:pin,p_id:id,p_at:nd.toISOString(),p_flow:f,p_machine:hasFlow?readMachine('ed'):null});
         if(error)return /bad_time/.test(error.message)?toast('That time is too far back.'):rpcErr(error);await load();toast('Entry updated')};
       $('del').onclick=()=>{close();confirmEvRemove(id)};
     });
@@ -873,6 +932,10 @@ function renderHelp(){
     '<div class="note" style="color:var(--ink2)">Gleneagles Aware emergency, open 24/7</div>'+
     '<div class="phone"><a href="tel:+914069081111" class="num">+91 40 6908 1111</a><button class="btn ghost" data-copy="+914069081111">Copy</button></div>'+
     '<div class="phone"><a href="tel:+918297222222" class="num">82972 22222</a><button class="btn ghost" data-copy="+918297222222">Copy</button></div></section>';
+  h+='<section class="sec"><h2>Oxygen machines</h2><div class="box"><p class="note" style="margin:0">The two machines are swapped regularly. Name them so everyone knows which is which. The app reminds everyone when it is time to swap.</p>'+
+    '<div class="times" style="grid-template-columns:repeat(2,minmax(0,1fr))"><label class="field" for="mn-1">First machine<input id="mn-1" maxlength="24" value="'+esc(mach.names[0])+'"></label><label class="field" for="mn-2">Second machine<input id="mn-2" maxlength="24" value="'+esc(mach.names[1])+'"></label></div>'+
+    '<div><div class="flbl">Swap every</div><div class="chips" role="group">'+[2,3,4,5,6].map(hh=>'<button type="button" data-hr="'+hh+'" aria-pressed="'+(+mach.hours===hh)+'">'+hh+' hours</button>').join('')+'</div></div>'+
+    '<button class="btn" id="b-mc" style="align-self:flex-start">Save for everyone</button></div></section>';
   h+='<section class="sec"><h2>SpO₂ alert level</h2><div class="box"><p class="note" style="margin:0">Readings below this number show in red, and the family’s phones get a “Low SpO₂” notification. Ask the doctor what number to use.</p>'+
     '<label class="field" for="al-v">Alert when SpO₂ is below (%)<input id="al-v" type="number" inputmode="numeric" min="70" max="99" placeholder="Not set" value="'+(alertAt==null?'':alertAt)+'"></label>'+
     '<div style="display:flex;gap:10px;flex-wrap:wrap"><button class="btn" id="b-al">Save for everyone</button>'+(alertAt==null?'':'<button class="btn ghost" id="b-al-x">Turn off</button>')+'</div></div></section>';
@@ -894,6 +957,11 @@ function renderHelp(){
     if(error)return /bad_value/.test(error.message)?toast('Use a number between 70 and 99'):rpcErr(error);alertAt=v;ls.set('rm-alert',v);render();toast(v==null?'Alert turned off':'Alert set below '+v+'%')};
   $('b-al').onclick=()=>{const v=parseInt($('al-v').value,10);if(isNaN(v)||v<70||v>99)return toast('Use a number between 70 and 99');saveAlert(v)};
   if($('b-al-x'))$('b-al-x').onclick=()=>saveAlert(null);
+  let hrs=+mach.hours;$('view').querySelectorAll('[data-hr]').forEach(b=>b.onclick=()=>{hrs=+b.dataset.hr;$('view').querySelectorAll('[data-hr]').forEach(x=>x.setAttribute('aria-pressed',String(x===b)))});
+  $('b-mc').onclick=async()=>{if(!need())return;const n=[$('mn-1').value.trim()||'Machine 1',$('mn-2').value.trim()||'Machine 2'];
+    if(n[0].toLowerCase()===n[1].toLowerCase())return toast('Give the two machines different names');
+    const{error}=await sb.rpc('set_machines',{p_pin:pin,p_names:n,p_hours:hrs});if(error)return rpcErr(error);
+    mach={names:n,hours:hrs};ls.set('rm-mach',mach);toast('Saved for everyone');render()};
   $('b-times').onclick=async()=>{
     const nt={am:$('t-am').value,pm:$('t-pm').value,night:times.night||'22:00'};
     if(!nt.am||!nt.pm)return toast('Fill in both times');
@@ -934,9 +1002,9 @@ function pushSection(){
   if(!pushSupported())body=isIOS&&!isStandalone()
     ?'<p style="margin:0">On iPhone, notifications work after the app is installed. Install it from the button above, open it from the home screen, then turn notifications on here.</p>'
     :'<p style="margin:0">This browser can’t show notifications. Try Chrome on Android, or install the app on iPhone.</p>';
-  else if(!push.on)body='<p style="margin:0">Get a notification when anyone ticks a dose, starts or ends an oxygen break, or logs SpO₂. Also a reminder when a break is up, and before and after each dose.</p><button class="btn" data-push-on style="align-self:flex-start">Turn on notifications</button>';
-  else body='<label class="tog" for="pn-a"><span>Updates from family<small>Ticks, oxygen breaks, SpO₂ readings, stock</small></span><input type="checkbox" id="pn-a"'+(push.activity?' checked':'')+'></label>'+
-    '<label class="tog" for="pn-r"><span>Reminders<small>Break time up, and 10 min before / 30 min after each dose</small></span><input type="checkbox" id="pn-r"'+(push.reminders?' checked':'')+'></label>'+
+  else if(!push.on)body='<p style="margin:0">Get a notification when anyone ticks a dose, starts or ends an oxygen break, swaps machines, or logs SpO₂. Also a reminder when a break is up, when it is time to swap machines, and before and after each dose.</p><button class="btn" data-push-on style="align-self:flex-start">Turn on notifications</button>';
+  else body='<label class="tog" for="pn-a"><span>Updates from family<small>Ticks, oxygen breaks, machine swaps, SpO₂ readings, stock</small></span><input type="checkbox" id="pn-a"'+(push.activity?' checked':'')+'></label>'+
+    '<label class="tog" for="pn-r"><span>Reminders<small>Break time up, machine swap due, and 10 min before / 30 min after each dose</small></span><input type="checkbox" id="pn-r"'+(push.reminders?' checked':'')+'></label>'+
     '<div style="display:flex;gap:10px;flex-wrap:wrap"><button class="btn ghost" id="pn-test">Send a test</button><button class="btn ghost" id="pn-off">Turn off on this phone</button></div>';
   return '<section class="sec"><h2>Notifications on this phone</h2><div class="box">'+body+'</div></section>';
 }
@@ -1066,7 +1134,7 @@ let oldLoaded=oldSpo.length>0;
 async function load(){
   if(!sb)return;
   const q=[sb.from('med_log2').select('date,slot,med_id,given_at,given_by'),sb.from('settings').select('key,value'),
-    sb.from('o2_event').select('id,at,kind,remind_at,by,flow').order('at'),sb.from('spo2_log').select('id,at,value,pulse,ctx,event_id,by').order('at'),
+    sb.from('o2_event').select('id,at,kind,remind_at,by,flow,machine').order('at'),sb.from('spo2_log').select('id,at,value,pulse,ctx,event_id,by').order('at'),
     sb.from('med_stock').select('med_id,count,set_at,set_by')];
   if(!oldLoaded)q.push(sb.from('dose_log').select('day,slot,med_id,given_at,given_by'),sb.from('spo2_reading').select('day,check_id,value,pulse,taken_at,taken_by'));
   const[a,b,c,d,e,f,g]=await Promise.all(q);
@@ -1074,6 +1142,7 @@ async function load(){
   log=new Map(a.data.map(r=>[key(r.date,r.slot,r.med_id),{at:r.given_at,by:r.given_by}]));
   events=c.data;reads=d.data.map(r=>({id:r.id,at:r.at,v:r.value,p:r.pulse,ctx:r.ctx,ev:r.event_id,by:r.by}));
   const t=(b.data.find(x=>x.key==='times')||{}).value;if(t){times=Object.assign(times,t);ls.set('rm-times',t)}
+  const mc=b.data.find(x=>x.key==='machines');if(mc&&mc.value&&mc.value.names){mach={names:mc.value.names,hours:+mc.value.hours||4};ls.set('rm-mach',mach)}
   const al=b.data.find(x=>x.key==='spo2_alert');alertAt=al&&al.value!=null?+al.value:null;ls.set('rm-alert',alertAt);
   if(!e.error){stock={};e.data.forEach(r=>{stock[r.med_id]={n:r.count,at:r.set_at,by:r.set_by}});ls.set('rm-stock',stock)}
   if(f&&!f.error&&g&&!g.error){

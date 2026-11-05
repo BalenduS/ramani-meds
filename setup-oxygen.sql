@@ -58,3 +58,10 @@ alter table public.o2_event add column flow numeric(3,1) check (flow > 0 and flo
 --   earlier time (up to 48 h back) when something is logged late.
 -- o2_edit(pin, id, at, flow): fix the time or flow of an entry (up to 7 days back).
 -- A flow change is a new 'on' or 'bipap' event with the new flow.
+
+-- 5 Nov 2026: two oxygen machines, swapped every few hours.
+alter table public.o2_event add column machine smallint check (machine in (1,2));  -- null on a break
+-- settings 'machines' = {"names": ["Machine 1","Machine 2"], "hours": 4}; set_machines(pin, names[], hours).
+-- o2_add(..., p_machine int default null); o2_edit(pin, id, at, flow, p_machine int default null).
+-- A swap is a new 'on'/'bipap' event on the other machine. The swap timer runs from the first event
+-- on the current machine (breaks don't reset it). Reminder at the interval and 30 min after.
