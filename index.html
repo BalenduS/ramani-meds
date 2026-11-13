@@ -333,6 +333,7 @@ nav.tabs button[aria-current="page"]{color:var(--brand);font-weight:700}
   html,body{background:#fff;color:#000}
   main{padding-bottom:0}
 }
+.retired{margin-top:12px;background:var(--brand-soft);color:var(--ink);border-radius:14px;padding:12px 14px;font-size:14px;line-height:1.45}
 </style>
 </head>
 <body>
@@ -412,7 +413,8 @@ let events=ls.get('rm2-ev',[]),reads=ls.get('rm2-rd',[]);
 let oldLog=new Map(Object.entries(ls.get('rm-old-log',{}))),oldSpo=ls.get('rm-old-spo',[]);
 let alertAt=ls.get('rm-alert',null),stock=ls.get('rm-stock',{});
 let mach=ls.get('rm-mach',{names:['Machine 1','Machine 2'],hours:4});
-let tab='today',sub=null,range=7,shown=30,live=false,deferredInstall=null,installHidden=ls.get('rm-inst-hide',false);
+const RETIRED='2026-11-13';
+let tab=RETIRED?'history':'today',sub=null,range=7,shown=30,live=false,deferredInstall=null,installHidden=ls.get('rm-inst-hide',false);
 let push=ls.get('rm-push',{on:false,activity:true,reminders:true}),pushHidden=ls.get('rm-push-hide',false);
 let remindMin=ls.get('rm-remind',30),busy=false;
 
@@ -477,7 +479,9 @@ const $=id=>document.getElementById(id);
 function render(){
   document.documentElement.dataset.mode='med';
   renderHeader();renderTabs();
+  if(RETIRED&&tab==='today')tab='history';
   if(tab==='today')renderToday();
+  else if(RETIRED&&tab==='help')renderRetiredHelp();
   else if(tab==='history'){if(sub==='spo')renderSpo();else if(sub==='old')renderOld();else if(sub&&sub.startsWith('oldday'))renderOldDay(+sub.slice(6));else renderHistory()}
   else renderHelp();
 }
@@ -485,7 +489,7 @@ function renderHeader(){
   const t=todayS();let eb,h1;
   if(tab==='today'){eb='Ongoing · since 31 Oct review';h1=(sel===t?'Today, ':'')+dLabel(pdate(sel))}
   else if(tab==='history'){eb='Mrs. Ramani Bala';h1=sub==='spo'?'SpO₂ &amp; pulse':sub==='old'?'Discharge plan':sub&&sub.startsWith('oldday')?dLabel(addDays(OLD_START,+sub.slice(6))):'History'}
-  else{eb='Mrs. Ramani Bala';h1='Help &amp; info'}
+  else{eb='Mrs. Ramani Bala';h1=RETIRED?'About this app':'Help &amp; info'}
   let h='<div class="toprow"><div><div class="eyebrow">'+eb+'</div><h1>'+h1+'</h1></div><div class="sync'+(live?' live':'')+'" role="status"><i></i>'+(live?'Live':'Offline')+'</div></div>';
   if(tab==='today'){
     const first=pdate(PLAN_START),today=pdate(t);let from=addDays(today,-6);if(from<first)from=first;
@@ -494,12 +498,13 @@ function renderHeader(){
       h+='<button class="day'+(s===t?' today':'')+'" data-day="'+s+'" aria-pressed="'+(s===sel)+'" aria-label="'+dLabel(d)+'"><span class="w">'+(s===t?'Today':W[d.getDay()])+'</span><span class="d num">'+d.getDate()+'</span><span class="b"><i style="width:'+Math.round(g/6*100)+'%"></i></span></button>'}
     h+='</div>';
   }
+  if(RETIRED)h+='<div class="retired" role="note"><b>Retired on 13 Nov 2026.</b> Everything the family recorded is kept here to look back on. Nothing new can be added, and reminders and notifications have stopped.</div>';
   $('hdr').innerHTML=h;
   $('hdr').querySelectorAll('[data-day]').forEach(b=>b.onclick=()=>{sel=b.dataset.day;render()});
   const s=$('strip');if(s)s.scrollLeft=s.scrollWidth;
 }
 function renderTabs(){
-  const T=[['today','Today',I.today],['history','History',I.hist],['help','Help & info',I.help]];
+  const T=RETIRED?[['history','History',I.hist],['help','About',I.help]]:[['today','Today',I.today],['history','History',I.hist],['help','Help & info',I.help]];
   $('tabs').innerHTML=T.map(([k,l,ic])=>'<button data-tab="'+k+'"'+(tab===k?' aria-current="page"':'')+'>'+ic+'<span>'+esc(l)+'</span></button>').join('');
   $('tabs').querySelectorAll('button').forEach(b=>b.onclick=()=>{tab=b.dataset.tab;sub=null;if(tab==='today')sel=todayS();render();window.scrollTo(0,0)});
 }
@@ -631,7 +636,7 @@ function bindToday(){
 }
 
 /* ---------- oxygen actions ---------- */
-function need(){if(!pin||!me){openSetup();return false}return true}
+function need(){if(RETIRED){toast('This app is retired. The records are read-only.');return false}if(!pin||!me){openSetup();return false}return true}
 function o2Action(a){
   if(!need())return;
   if(a==='on')return openOn();
@@ -922,6 +927,16 @@ function renderSpo(){
 }
 
 /* ---------- help ---------- */
+function renderRetiredHelp(){
+  let h='<section class="sec"><h2>This app is retired</h2><div class="box"><p style="margin:0">Ramani Meds tracked medicines, oxygen and SpO₂ for the family from 18 Oct to 13 Nov 2026. The History tab keeps every tick, reading and note as they were recorded.</p><p class="note" style="margin:0">Reminders and family notifications are switched off. You can remove the app from your home screen whenever you like; the records stay online.</p></div></section>';
+  h+='<section class="sec"><h2>Follow-up</h2><div class="box"><dl class="kv"><dt>Last review</dt><dd>Sat 31 Oct 2026, OPD</dd><dt>Doctor</dt><dd>Dr. Sarath Chandra Bhrungi, Pulmonology, Gleneagles Aware, L.B. Nagar</dd><dt>Advice</dt><dd>Continue home oxygen and BiPAP. Continue the three medicines twice a day.</dd><dt>Diet</dt><dd>High protein: dairy, eggs, lean meat, dal, soy, nuts.</dd></dl></div></section>';
+  h+='<section class="box alert"><h2>Get urgent care if there is</h2><ul><li>Shortness of breath</li><li>Fever</li><li>Cough with sputum</li></ul>'+
+    '<div class="note" style="color:var(--ink2)">Gleneagles Aware emergency, open 24/7</div>'+
+    '<div class="phone"><a href="tel:+914069081111" class="num">+91 40 6908 1111</a><button class="btn ghost" data-copy="+914069081111">Copy</button></div>'+
+    '<div class="phone"><a href="tel:+918297222222" class="num">82972 22222</a><button class="btn ghost" data-copy="+918297222222">Copy</button></div></section>';
+  $('view').innerHTML=h;
+  $('view').querySelectorAll('[data-copy]').forEach(b=>b.onclick=()=>{const v=b.dataset.copy;try{navigator.clipboard.writeText(v).then(()=>toast('Copied '+v),()=>{})}catch(e){}});
+}
 function renderHelp(){
   let h=(isStandalone()?'':'<section class="sec"><h2>Install on this phone</h2><div class="install"><span style="color:var(--brand);display:grid">'+I.dl+'</span><div class="tx"><b>Add to home screen</b>Opens like an app, full screen, one tap away.</div><button class="btn" data-install>Install</button></div></section>');
   h+=pushSection();
@@ -1174,8 +1189,13 @@ function tick(){
 render();
 if(!sb){toast('Offline. Showing the last saved data.')}
 else{load();subscribe()}
-if(!me||!pin)setTimeout(()=>openSetup(false),300);
-if(push.on&&pushSupported()&&me&&pin)setTimeout(()=>savePush(true),1500);
+if(RETIRED){
+  if(push.on){push.on=false;ls.set('rm-push',push)}
+  if(pushSupported())setTimeout(()=>{currentSub().then(x=>{if(x)x.unsubscribe().catch(()=>{})})},1500);
+}else{
+  if(!me||!pin)setTimeout(()=>openSetup(false),300);
+  if(push.on&&pushSupported()&&me&&pin)setTimeout(()=>savePush(true),1500);
+}
 setInterval(tick,1000);
 setInterval(()=>{if(tab!=='help'&&!document.querySelector('#layer .scrim'))render()},60000);
 document.addEventListener('visibilitychange',()=>{if(!document.hidden){load();if(!live)subscribe()}});
